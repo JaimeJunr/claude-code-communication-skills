@@ -1,0 +1,128 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "communication-stack",
+  "owner": {
+    "name": "Jaime Basso",
+    "url": "https://github.com/JaimeJunr"
+  },
+  "metadata": {
+    "description": "Objective, short, clear communication for Claude Code: one task recipe, four optional output styles, explicit conflict rulings, and no runtime hooks."
+  },
+  "plugins": [
+    {
+      "name": "communication-stack",
+      "source": "./plugins/communication-stack",
+      "description": "A task router, context precedence, and four optional output styles: Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
+      "author": {
+        "name": "Jaime Basso",
+        "url": "https://github.com/JaimeJunr"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "caveman",
+      "source": "./plugins/caveman",
+      "description": "Base caveman brevity recipe, scoped to one task with readable grammar and exact technical payload.",
+      "author": {
+        "name": "Julius Brussee"
+      },
+      "category": "productivity",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/JuliusBrussee/caveman",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "i-have-adhd",
+      "source": "./plugins/i-have-adhd",
+      "description": "Action-first formatting for a requested task: bounded steps, useful progress, and complete coverage.",
+      "author": {
+        "name": "Ayoub Ghriss"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/ayghri/i-have-adhd",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "humanizer",
+      "source": "./plugins/humanizer",
+      "description": "Substantial editing of supplied prose for formulaic writing patterns, preserving supported claims and author voice.",
+      "author": {
+        "name": "Siqi Chen"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/blader/humanizer",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "no-ai-slop",
+      "source": "./plugins/no-ai-slop",
+      "description": "Minimum effective edits and requested pattern audits of supplied drafts, preserving personal voice.",
+      "author": {
+        "name": "Peter Yang"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/petergyang/no-ai-slop",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "eli5-ste",
+      "source": "./plugins/eli5-ste",
+      "description": "Task-scoped plain-language and executive explanations, plus explicitly requested Simplified Technical English.",
+      "author": {
+        "name": "Rahul Jain"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/rahulj51/eli5",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    }
+  ]
+}

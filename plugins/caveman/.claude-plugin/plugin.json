@@ -1,0 +1,18 @@
+{
+  "name": "caveman",
+  "description": "Base caveman brevity recipe, scoped to one task with readable grammar and exact technical payload.",
+  "author": {
+    "name": "Julius Brussee"
+  },
+  "homepage": "https://github.com/JuliusBrussee/caveman",
+  "repository": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "communication",
+    "writing",
+    "clarity",
+    "output-styles",
+    "claude-code",
+    "skills"
+  ]
+}

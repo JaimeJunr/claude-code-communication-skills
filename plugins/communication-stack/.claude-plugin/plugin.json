@@ -1,0 +1,19 @@
+{
+  "name": "communication-stack",
+  "description": "A task router, context precedence, and four optional output styles: Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
+  "author": {
+    "name": "Jaime Basso",
+    "url": "https://github.com/JaimeJunr"
+  },
+  "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "repository": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "license": "MIT",
+  "keywords": [
+    "communication",
+    "writing",
+    "clarity",
+    "output-styles",
+    "claude-code",
+    "skills"
+  ]
+}

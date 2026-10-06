@@ -1,0 +1,66 @@
+name: Sync upstream skills
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Segunda-feira, 09:00 UTC.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # O push usa a credencial persistida pelo checkout; os tokens devem coincidir.
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync from upstream
+        run: python scripts/sync.py
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Check regenerated content
+        run: |
+          python -m pytest tests -q
+          python scripts/token_budget.py
+
+      - name: Summarize upstream changes
+        id: summary
+        run: |
+          {
+            echo 'body<<EOF'
+            echo 'Automated weekly sync from upstream.'
+            echo
+            echo '```'
+            git diff --stat -- plugins UPSTREAM.lock | tail -n 30
+            echo '```'
+            echo
+            echo 'Review source, license, notice, and adapter changes before merging. Behavioral evaluation remains a release requirement.'
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # PRs com GITHUB_TOKEN não disparam CI; SYNC_TOKEN permite o check validate.
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
+          branch: chore/upstream-sync
+          delete-branch: true
+          commit-message: "chore: sync upstream skills"
+          title: "chore: sync upstream skills"
+          body: ${{ steps.summary.outputs.body }}
+          labels: upstream-sync

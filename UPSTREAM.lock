@@ -1,0 +1,74 @@
+{
+  "caveman": {
+    "repo": "JuliusBrussee/caveman",
+    "ref": "main",
+    "commit": "99aafe151a1be72be783e662858e8a0955add59f",
+    "license": "Apache-2.0",
+    "files": {
+      "skills/caveman/SKILL.md": "34255a0215a7701eb83d508d03bc9560dc7bffbeb95a145ad2921ad2598a03bf",
+      "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "NOTICE": "20112dc6e62e91da4f03c29fd10cfa41743a9c526389fdf1396c3649c18216fc",
+      "LICENSE-MIT": "5eb826cd03151bcc7cce3f80d40e87733237fedfc6c36d6908aca5fd650a0bdb",
+      "LICENSING.md": "8db395e0461eb079c146779865748ac51546004925c72999ae2e266efb595a32"
+    },
+    "synced_at": "2026-10-06"
+  },
+  "adhd": {
+    "repo": "ayghri/i-have-adhd",
+    "ref": "main",
+    "commit": "839872f9d1cd634fed642b4589ce7226199cc15f",
+    "license": "MIT",
+    "files": {
+      "skills/i-have-adhd/SKILL.md": "3170b16ace00aecb0dd7feb54c0b5aa642e7502acda06ecd24fd89a11c7127e9",
+      "LICENSE": "8acbb618089b738404f76ac60fca1aaa995d9a87995eddf95f0b777acd7f7d2c"
+    },
+    "synced_at": "2026-10-06"
+  },
+  "humanizer": {
+    "repo": "blader/humanizer",
+    "ref": "main",
+    "commit": "225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8",
+    "license": "MIT",
+    "files": {
+      "SKILL.md": "0612f1dfb1672b0ea9b97e139bf1f06cabe98d8b27424fe8ff01e1fb4cc99cad",
+      "LICENSE": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96"
+    },
+    "synced_at": "2026-10-06"
+  },
+  "no-ai-slop": {
+    "repo": "petergyang/no-ai-slop",
+    "ref": "main",
+    "commit": "000650b156983f5159695b441477f4e63b25dc85",
+    "license": "MIT",
+    "files": {
+      "skills/no-ai-slop/SKILL.md": "992b365f51a2f62cf4c1c5ed22049a9ee551dfea677550c1a72b371c0ceadd62",
+      "skills/no-ai-slop/eval.md": "8ad8d83ed1abe7fc054ad74966bfca64fc182bc71f59d701b24b962c39d11ad7",
+      "LICENSE": "b7a7fe370cc4c9e974528c7cea7841cf8ac886bc9ed947edb11b289441fba4a8"
+    },
+    "synced_at": "2026-10-06"
+  },
+  "rahul-eli5": {
+    "repo": "rahulj51/eli5",
+    "ref": "main",
+    "commit": "43055a43a94f5508b74eb3ce31a103c55369aaf2",
+    "license": "MIT",
+    "files": {
+      "skills/eli5/SKILL.md": "a2d1879ac1648a00c52482d5cf869aebe52bdb1b534df2649f962026178406d6",
+      "skills/ste/SKILL.md": "4c759210c7340312d463c4dc8c727fb566be17ae0b6b9f043284c3a2e08798c4",
+      "LICENSE": "548c877c8f7b7b02e6745ef49bee2e106b0c416fba4bd552d32593975a3bb36b"
+    },
+    "synced_at": "2026-10-06"
+  },
+  "talk-normal": {
+    "repo": "hexiecs/talk-normal",
+    "ref": "main",
+    "commit": "d89cf329e775e640181427fae071652198264c7e",
+    "license": "MIT",
+    "files": {
+      "prompt.md": "967b614daef6e3d8831478107cd24dec649961cdf32104405965fa8d7e2bf91b",
+      "prompt-chatgpt.md": "db2839ab33b2f6622ee4be0b252b6bd75aa396b3520ee91e9655819523f3caab",
+      "LICENSE": "f964f47abdaa5bfd77e17cc609019e400ce91fae37a784b0ab8ff30725af2566"
+    },
+    "synced_at": "2026-10-06"
+  }
+}

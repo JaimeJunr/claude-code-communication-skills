@@ -1,0 +1,18 @@
+{
+  "name": "eli5-ste",
+  "description": "Task-scoped plain-language and executive explanations, plus explicitly requested Simplified Technical English.",
+  "author": {
+    "name": "Rahul Jain"
+  },
+  "homepage": "https://github.com/rahulj51/eli5",
+  "repository": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "license": "MIT",
+  "keywords": [
+    "communication",
+    "writing",
+    "clarity",
+    "output-styles",
+    "claude-code",
+    "skills"
+  ]
+}

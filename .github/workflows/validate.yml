@@ -1,0 +1,70 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/**"
+      - "scripts/**"
+      - "tests/**"
+      - "docs/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/**"
+      - "stack.json"
+      - "UPSTREAM.lock"
+      - "requirements-dev.txt"
+      - "LICENSE"
+      - "*.md"
+  pull_request:
+    paths:
+      - "plugins/**"
+      - "scripts/**"
+      - "tests/**"
+      - "docs/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/**"
+      - "stack.json"
+      - "UPSTREAM.lock"
+      - "requirements-dev.txt"
+      - "LICENSE"
+      - "*.md"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Check stack
+        run: python scripts/sync.py --check
+
+      - name: Test sync patches and stack contracts
+        run: python -m pytest tests -q
+
+      - name: Token budget of hand-written plugins
+        run: python scripts/token_budget.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate marketplace and plugins
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate .
+          for p in plugins/*/; do claude plugin validate "$p"; done

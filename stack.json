@@ -1,0 +1,584 @@
+{
+  "$comment": "Referências ficam junto aos estilos para preservar as licenças na instalação isolada; fontes e patches explícitos evitam reintroduzir hooks ou modos persistentes.",
+  "marketplace": {
+    "name": "communication-stack",
+    "owner": {
+      "name": "Jaime Basso",
+      "url": "https://github.com/JaimeJunr"
+    },
+    "description": "Objective, short, clear communication for Claude Code: one task recipe, four optional output styles, explicit conflict rulings, and no runtime hooks.",
+    "repository": "https://github.com/JaimeJunr/claude-code-communication-skills"
+  },
+  "sources": [
+    {
+      "id": "caveman",
+      "repo": "JuliusBrussee/caveman",
+      "plugin": "caveman",
+      "author": "Julius Brussee",
+      "license": "Apache-2.0",
+      "description": "Base caveman brevity recipe, scoped to one task with readable grammar and exact technical payload.",
+      "copy": [
+        {
+          "from": "skills/caveman/SKILL.md",
+          "to": "skills/caveman/SKILL.md"
+        },
+        {
+          "from": "LICENSE",
+          "to": "skills/communication-stack/references/upstream/caveman/LICENSE",
+          "plugin": "communication-stack"
+        },
+        {
+          "from": "NOTICE",
+          "to": "skills/communication-stack/references/upstream/caveman/NOTICE",
+          "plugin": "communication-stack"
+        },
+        {
+          "from": "LICENSE-MIT",
+          "to": "skills/communication-stack/references/upstream/caveman/LICENSE-MIT",
+          "plugin": "communication-stack"
+        },
+        {
+          "from": "LICENSING.md",
+          "to": "skills/communication-stack/references/upstream/caveman/LICENSING.md",
+          "plugin": "communication-stack"
+        }
+      ],
+      "license_files": [
+        "LICENSE",
+        "NOTICE",
+        "LICENSE-MIT",
+        "LICENSING.md"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "patches": [
+        {
+          "file": "skills/caveman/SKILL.md",
+          "upstream_commit": "99aafe151a1be72be783e662858e8a0955add59f",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below. Remove session aliases, retain readable grammar and real uncertainty, soften sentence limits, and make next actions conditional (T2, T3, T4).",
+          "description": "Explicit brevity pass for the current chat task. Preserve readable grammar, necessary substance, and exact technical payload. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from JuliusBrussee/caveman (Apache-2.0); reviewed base 99aafe151a1be72be783e662858e8a0955add59f. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nFollow the requested language, audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            },
+            {
+              "pattern": "Respond\\ terse\\ like\\ smart\\ caveman\\.\\ All\\ technical\\ substance\\ stay\\.\\ Only\\ fluff\\ die\\.",
+              "with": "Respond briefly with readable grammar. Preserve all technical substance; cut empty ceremony.",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\ Persistence\\\n\\\nEvery\\ response,\\ whole\\ session,\\ until\\ user\\ says\\ \"stop\\ caveman\"\\ or\\ \"normal\\ mode\"\\.\\ Unsure\\ if\\ still\\ on\\?\\ It\\ is\\.\\ Confirm\\ the\\ switch\\-off\\ in\\ one\\ line\\.\\\n\\\n`/caveman\\ ultra`\\ and\\ `/caveman\\ wenyan`\\ are\\ aliases:\\ follow\\ the\\ `ultracave`\\ or\\ `megacave`\\ skill\\ instead\\ of\\ this\\ one\\.\\ `/caveman\\ status`\\ reports\\ the\\ mode\\ and\\ changes\\ nothing\\.\\ Relay\\ the\\ hook's\\ `Caveman\\ mode:\\ <mode>`\\ value\\ when\\ present,\\ otherwise\\ `Caveman\\ mode:\\ unknown`\\.\\ Never\\ infer\\ a\\ mode\\ from\\ the\\ configured\\ default\\.\\\n\\\n",
+              "with": "## Task scope\n\nDo not switch the selected output style or report a hook-dependent mode. Apply this brevity pass to the requested task only.\n\n",
+              "count": 1
+            },
+            {
+              "pattern": "Answer,\\ then\\ reason,\\ then\\ next\\ step\\.\\ Pattern:\\ `\\[thing\\]\\ \\[action\\]\\ \\[reason\\]\\.\\ \\[next\\ step\\]\\.`",
+              "with": "Give the answer first, then the reason when needed. Give a next step only when relevant.",
+              "count": 1
+            },
+            {
+              "pattern": "Good:\\ \"Bug\\ in\\ auth\\ middleware\\.\\ Token\\ expiry\\ check\\ use\\ `<`\\ not\\ `<=`\\.\\ Fix:\"",
+              "with": "Good: \"The bug is in the auth middleware. The token expiry check uses `<` instead of `<=`. Fix:\"",
+              "count": 1
+            },
+            {
+              "pattern": "No\\ greeting,\\ hedging,\\ pleasantries,\\ recap,\\ or\\ closer\\.\\ No\\ \"Sure!\",\\ \"Let\\ me\",\\ \"I'll\\ now\",\\ \"Hope\\ this\\ helps\"\\.\\ No\\ just/really/basically/actually/simply\\.",
+              "with": "Cut greetings, pleasantries, ceremonial hedging, empty qualifiers, redundant recaps, and closers. Keep genuine uncertainty, limits, and conditions.",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\#\\ 4\\.\\ Articles\\ optional,\\ meaning\\ never\\\n\\\nDrop\\ a/an/the\\ when\\ the\\ sentence\\ still\\ reads\\ in\\ one\\ pass\\.\\ Fragments\\ fine\\.\\ Never\\ drop\\ not/never/no/only/except\\.\\ Numbers\\ and\\ units\\ exact\\.",
+              "with": "### 4. Readable grammar, exact meaning\n\nUse complete, readable sentences. Short labels are fine. Keep articles and grammatical relationships when they help a single-pass reading. Never drop not/never/no/only/except. Numbers and units stay exact.",
+              "count": 1
+            },
+            {
+              "pattern": "Good:\\ \"Back\\ up\\ first\\.\\ Then\\ run\\ migration:\\ it\\ drops\\ the\\ column\\.\"",
+              "with": "Good: \"Back up first. Then run the migration: it drops the column.\"",
+              "count": 1
+            },
+            {
+              "pattern": "ASD\\-STE100\\ is\\ the\\ floor:\\ 20\\ words\\ max,\\ active\\ voice,\\ imperative\\ for\\ instructions,\\ one\\ term\\ per\\ thing,\\ pronoun\\ only\\ with\\ an\\ obvious\\ referent\\.\\ Compression\\ and\\ clarity\\ conflict\\?\\ Clarity\\ wins\\.",
+              "with": "Prefer short sentences and one clear idea per sentence. Clarity and necessary precision outrank a sentence-length target. Do not claim STE compliance from this brevity rule.",
+              "count": 1
+            },
+            {
+              "pattern": "Code\\ blocks\\ unchanged\\.\\ Commands,\\ paths,\\ API\\ names\\ exact\\.\\ Errors\\ quoted\\ exact,\\ shortest\\ decisive\\ line\\ only\\.",
+              "with": "Code blocks stay unchanged. Commands, paths, and API names stay exact. Quote errors exactly and include the context needed by the requested output contract.",
+              "count": 1
+            },
+            {
+              "pattern": "\\ `/caveman\\-compress`\\ exempt\\.",
+              "with": "",
+              "count": 1
+            }
+          ]
+        }
+      ],
+      "adaptations": [
+        {
+          "file": "plugins/communication-stack/output-styles/caveman-lite.md",
+          "why": "Owned adapter of this source under Apache-2.0, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+        }
+      ]
+    },
+    {
+      "id": "adhd",
+      "repo": "ayghri/i-have-adhd",
+      "plugin": "i-have-adhd",
+      "author": "Ayoub Ghriss",
+      "license": "MIT",
+      "description": "Action-first formatting for a requested task: bounded steps, useful progress, and complete coverage.",
+      "copy": [
+        {
+          "from": "skills/i-have-adhd/SKILL.md",
+          "to": "skills/i-have-adhd/SKILL.md"
+        },
+        {
+          "from": "LICENSE",
+          "to": "skills/communication-stack/references/upstream/adhd/LICENSE",
+          "plugin": "communication-stack"
+        }
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "patches": [
+        {
+          "file": "skills/i-have-adhd/SKILL.md",
+          "upstream_commit": "839872f9d1cd634fed642b4589ce7226199cc15f",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below. Replace persistent mode, unconditional recaps, invented durations, and secondary-topic offers; retain bounded steps and completeness (T3, T4, T5, T6).",
+          "description": "Explicit action-first formatting for the current task: bounded numbered steps and useful visible progress. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from ayghri/i-have-adhd (MIT); reviewed base 839872f9d1cd634fed642b4589ce7226199cc15f. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nFollow the requested language, audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            },
+            {
+              "pattern": "The\\ reader\\ has\\ ADHD\\.\\ Output\\ is\\ not\\ just\\ brief\\.\\ It\\ is\\ shaped\\ so\\ an\\ ADHD\\ brain\\ can\\ act\\ on\\ it\\.",
+              "with": "The reader requested action-first formatting. Make the answer and any needed action easy to find.",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\ Persistence\\\n\\\nThese\\ rules\\ apply\\ to\\ every\\ response\\ for\\ the\\ rest\\ of\\ the\\ session,\\ not\\ only\\ this\\ one\\.\\ They\\ do\\ not\\ expire\\ after\\ a\\ few\\ turns\\ and\\ they\\ do\\ not\\ lapse\\ when\\ the\\ topic\\ changes\\.\\ If\\ you\\ are\\ unsure\\ whether\\ they\\ still\\ apply,\\ they\\ do\\.\\\n\\\nTurn\\ them\\ off\\ only\\ when\\ the\\ reader\\ says\\ \"stop\\ adhd\\ mode\"\\ or\\ \"normal\\ mode\"\\.\\ Confirm\\ in\\ one\\ line,\\ then\\ return\\ to\\ your\\ default\\ style\\.\\\n\\\n",
+              "with": "## Task scope\n\nDo not change the selected output style or establish a persistent mode. Apply these rules to the requested task only.\n\n",
+              "count": 1
+            },
+            {
+              "pattern": "If\\ anything\\ is\\ left\\ open,\\ name\\ ONE\\ thing\\ the\\ reader\\ can\\ do\\ in\\ under\\ two\\ minutes\\.\\ Even\\ \"open\\ the\\ file\"\\ counts\\.",
+              "with": "If anything is left open, name one useful next action. Prefer a small action the reader can do now when possible; do not invent an action after completion.",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\#\\ 4\\.\\ Suppress\\ tangents\\\n\\\nIf\\ a\\ second\\ issue\\ exists,\\ finish\\ the\\ first,\\ then\\ offer\\ the\\ second\\ as\\ a\\ separate\\ question\\.\\\n\\\nBad:\\ \"Here's\\ the\\ fix\\.\\ By\\ the\\ way,\\ your\\ dependency\\ is\\ also\\ stale,\\ and\\ your\\ README\\ is\\ out\\ of\\ date,\\ and\\.\\.\\.\"\\\nGood:\\ \"Here's\\ the\\ fix\\.\\ Separately:\\ there\\ is\\ also\\ a\\ stale\\ dependency\\.\\ Want\\ me\\ to\\ handle\\ that\\ next\\?\"\\\n\\\nA\\ question\\ that\\ comes\\ up\\ mid\\-work\\ is\\ not\\ a\\ tangent:\\ answer\\ it\\ yourself\\ if\\ you\\ can\\ and\\ fold\\ the\\ result\\ in\\.\\ If\\ it\\ still\\ needs\\ the\\ reader,\\ surface\\ it\\ once,\\ at\\ the\\ end\\.\\\n\\\n",
+              "with": "### 4. Stay on the requested issue\n\nFinish the requested issue. Include a secondary issue only when it affects the requested outcome; otherwise omit it unless requested.\n\nA question that comes up mid-work is not a tangent: answer it yourself if context permits. Ask a necessary unresolved question once, when its answer is needed.\n\n",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\#\\ 5\\.\\ Restate\\ state\\ every\\ turn\\\n\\\nThe\\ reader\\ cannot\\ hold\\ \"we\\ are\\ on\\ step\\ 3\\ of\\ 5\"\\ between\\ messages\\.\\ Restate\\ it\\.\\\n\\\nBad:\\ \"Done\\.\\ Ready\\ for\\ the\\ next\\ part\\?\"\\\nGood:\\ \"Step\\ 3\\ of\\ 5\\ done:\\ schema\\ updated\\.\\ Next:\\ backfill\\ the\\ new\\ column\\.\\ Run\\ the\\ script\\?\"\\\n\\\nIf\\ the\\ harness\\ has\\ a\\ task\\ or\\ plan\\ tool,\\ use\\ it\\ for\\ multi\\-step\\ work:\\ one\\ item\\ per\\ step,\\ one\\ in\\ progress\\ at\\ a\\ time\\.\\ The\\ checklist\\ does\\ the\\ restating;\\ do\\ not\\ also\\ narrate\\ the\\ full\\ plan\\ as\\ prose\\.\\\n\\\n",
+              "with": "### 5. Show useful progress\n\nDuring ongoing multi-step work, show one short step indicator when it helps orientation. Report changed state; otherwise avoid repeating background or completed-task recaps. If the harness already displays progress, do not duplicate it in prose.\n\n",
+              "count": 1
+            },
+            {
+              "pattern": "Vague\\ estimates\\ fail\\.\\ Ballpark\\ in\\ concrete\\ units\\.",
+              "with": "Give time estimates only when supportable, and label estimates as estimates. Use concrete units and relevant conditions; do not invent precise durations.",
+              "count": 1
+            },
+            {
+              "pattern": "When\\ more\\ items\\ are\\ relevant,\\ retain\\ them\\ internally\\ without\\ discarding\\ them\\.\\ Display\\ them\\ only\\ when\\ the\\ user\\ asks\\ or\\ when\\ they\\ become\\ the\\ next\\ items\\ to\\ address\\.",
+              "with": "Retain all relevant items. Display every requested or necessary item, grouping longer lists without deleting coverage or meaningful hierarchy.",
+              "count": 1
+            },
+            {
+              "pattern": "3\\.\\ Any\\ \"by\\ the\\ way\"\\ sidebar\\.",
+              "with": "3. Any unrelated chat sidebar. Keep intentional asides belonging to a requested prose artifact.",
+              "count": 1
+            },
+            {
+              "pattern": "Then\\ verify:\\ if\\ the\\ reader\\ reads\\ only\\ the\\ first\\ line\\ and\\ the\\ last\\ line,\\ do\\ they\\ know\\ \\(a\\)\\ what\\ to\\ do\\ next,\\ and\\ \\(b\\)\\ what\\ just\\ happened\\?",
+              "with": "Then verify: the first line gives the requested answer or action, and the last stays on the same goal. A finished answer needs no next action.",
+              "count": 1
+            }
+          ],
+          "model_invocable": true
+        }
+      ],
+      "adaptations": [
+        {
+          "file": "plugins/communication-stack/output-styles/adhd.md",
+          "why": "Owned adapter of this source under MIT, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+        }
+      ]
+    },
+    {
+      "id": "humanizer",
+      "repo": "blader/humanizer",
+      "plugin": "humanizer",
+      "author": "Siqi Chen",
+      "license": "MIT",
+      "description": "Substantial editing of supplied prose for formulaic writing patterns, preserving supported claims and author voice.",
+      "copy": [
+        {
+          "from": "SKILL.md",
+          "to": "skills/humanizer/SKILL.md"
+        }
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "patches": [
+        {
+          "file": "skills/humanizer/SKILL.md",
+          "upstream_commit": "225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below. Return final pasted text once; critique and intermediate drafts require a request (T9).",
+          "description": "Substantial cleanup of supplied prose for AI writing patterns, preserving supported claims and the writer's voice. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from blader/humanizer (MIT); reviewed base 225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nFollow the requested language, audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            },
+            {
+              "pattern": "\\*\\*Pasted\\ text\\ \\(default\\)\\.\\*\\*\\ Return\\ the\\ draft,\\ a\\ short\\ list\\ of\\ remaining\\ patterns,\\ and\\ the\\ final\\ rewrite\\.",
+              "with": "**Pasted text (default).** Return the final text once. Include critique, intermediate drafts, or a change summary only when requested.",
+              "count": 1
+            },
+            {
+              "pattern": "Then\\ give\\ the\\ user\\ a\\ short\\ summary\\.",
+              "with": "Then give only the concise completion information required by the task.",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "no-ai-slop",
+      "repo": "petergyang/no-ai-slop",
+      "plugin": "no-ai-slop",
+      "author": "Peter Yang",
+      "license": "MIT",
+      "description": "Minimum effective edits and requested pattern audits of supplied drafts, preserving personal voice.",
+      "copy": [
+        {
+          "from": "skills/no-ai-slop/SKILL.md",
+          "to": "skills/no-ai-slop/SKILL.md"
+        },
+        {
+          "from": "skills/no-ai-slop/eval.md",
+          "to": "skills/no-ai-slop/eval.md"
+        }
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "patches": [
+        {
+          "file": "skills/no-ai-slop/SKILL.md",
+          "upstream_commit": "000650b156983f5159695b441477f4e63b25dc85",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below. Make edit notes optional, remove detect offers, preserve real actors and technical vocabulary, and make interviews conditional (T7, T8, T9).",
+          "description": "Minimum effective edits or a requested pattern audit of a supplied draft, preserving the writer's personal voice. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from petergyang/no-ai-slop (MIT); reviewed base 000650b156983f5159695b441477f4e63b25dc85. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nFollow the requested language, audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            },
+            {
+              "pattern": "return\\ the\\ edited\\ draft\\ plus\\ a\\ What\\ changed\\ section\\.",
+              "with": "return the edited draft once. Add What changed only if the user asks for edit notes.",
+              "count": 1
+            },
+            {
+              "pattern": "\\ Offer\\ to\\ edit\\ the\\ draft\\ after\\.",
+              "with": "",
+              "count": 1
+            },
+            {
+              "pattern": "If\\ the\\ audience\\ or\\ format\\ is\\ unclear,\\ ask\\ one\\ question:\\ Who\\ is\\ this\\ for\\ and\\ where\\ will\\ it\\ be\\ published\\?\\\n\\\nIf\\ the\\ goal\\ is\\ unclear,\\ ask\\ what\\ the\\ reader\\ should\\ think,\\ feel,\\ or\\ do\\ after\\ reading\\ it\\.",
+              "with": "Ask for missing audience, format, or goal information only when the answer materially depends on it and existing context does not supply it. Otherwise proceed with the requested edit.",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ \\*\\*Use\\ active\\ voice\\.\\*\\*\\ \"The\\ team\\ shipped\\ it\\ Tuesday\"\\ beats\\ \"the\\ decision\\ emerged\\.\"\\ Never\\ let\\ inanimate\\ things\\ do\\ human\\ verbs\\.",
+              "with": "- **Name the actual actor and action.** Technical systems can perform their actual operations; avoid invented agency. Use active voice when it clarifies the actor. Useful passive voice is allowed.",
+              "count": 1
+            },
+            {
+              "pattern": "If\\ you\\ reorganize,\\ say\\ why\\ in\\ the\\ What\\ changed\\ section\\.",
+              "with": "If the user requested edit notes, explain any reorganization in What changed.",
+              "count": 1
+            },
+            {
+              "pattern": "Banned\\ outright:",
+              "with": "Avoid these empty stock words in editable prose. Exact payload, names, quotations, necessary technical senses, and meaningful writer voice are exempt:\n\nWords to check:",
+              "count": 1
+            },
+            {
+              "pattern": "\\*\\*Binary\\ contrasts\\.\\*\\*",
+              "with": "**Binary contrasts.** Cut staged contrasts against an alternative nobody claimed. Keep a contrast when both sides convey information or it corrects a real misunderstanding. The following examples concern empty formulae:",
+              "count": 1
+            },
+            {
+              "pattern": "In\\ short\\ copy,\\ use\\ none\\.\\ In\\ longer\\ drafts,\\ 1\\-2\\ are\\ fine\\ if\\ they\\ clearly\\ beat\\ commas,\\ periods,\\ or\\ parentheses\\.",
+              "with": "Prefer plain punctuation. Keep useful or sample-matched dashes; avoid clusters and decorative rhythm.",
+              "count": 1
+            },
+            {
+              "pattern": "then\\ check\\ the\\ edited\\ draft\\ against\\ `eval\\.md`\\ yourself\\.",
+              "with": "then check the edited draft against `eval.md` yourself, applying the context contract above to every style check. Keep the internal evaluation out of the response unless requested.",
+              "count": 1
+            },
+            {
+              "pattern": "6\\.\\ Output\\ the\\ full\\ edited\\ draft\\ and\\ a\\ short\\ \\*\\*What\\ changed\\*\\*\\ section\\.",
+              "with": "6. Return the full edited draft once. Add **What changed** only when the user asks for edit notes.",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "file": "skills/no-ai-slop/eval.md",
+          "upstream_commit": "000650b156983f5159695b441477f4e63b25dc85",
+          "conflicts": [
+            "T7",
+            "T8",
+            "T9",
+            "T10"
+          ],
+          "why": "DESIGN.md D: keep the source review, apply meaning/voice/exactness exceptions, and check optional edit notes without publishing internal evaluation.",
+          "replace": [
+            {
+              "pattern": "Use\\ this\\ after\\ the\\ rewrite\\.\\ Answer\\ each\\ check\\ with\\ pass\\ or\\ fail\\.\\ If\\ any\\ check\\ fails,\\ fix\\ the\\ draft\\ before\\ returning\\ it\\.",
+              "with": "Use this internally after the rewrite. Apply the SKILL.md context contract to every check: preserve meaning, writer voice, useful punctuation, real uncertainty, technical terms, and exact protected spans. Examples do not authorize invented facts. Record pass or fail internally; fix failures before returning the draft. Publish the evaluation only when requested.",
+              "count": 1
+            },
+            {
+              "pattern": "Does\\ the\\ draft\\ use\\ active\\ voice\\ with\\ human\\ subjects\\ where\\ possible\\?",
+              "with": "Does the draft name the actual actor, including technical systems, using active or useful passive voice clearly?",
+              "count": 1
+            },
+            {
+              "pattern": "Are\\ banned\\ words,\\ filler\\ phrases,\\ often\\-empty\\ adverbs,\\ and\\ inflated\\ claims\\ removed\\ unless\\ quoted\\ as\\ examples\\?",
+              "with": "Are empty stock words and inflated claims removed while exact payload, names, quotations, necessary technical senses, and meaningful author voice survive?",
+              "count": 1
+            },
+            {
+              "pattern": "Are\\ binary\\ contrasts,\\ negative\\ listings,\\ rhetorical\\ setups,\\ and\\ throat\\-clearing\\ openers\\ removed\\?",
+              "with": "Are empty formulae removed while informative contrasts, real corrections, and necessary questions survive?",
+              "count": 1
+            },
+            {
+              "pattern": "Are\\ em\\ dashes\\ used\\ sparingly:\\ Usually\\ none\\ in\\ short\\ copy,\\ and\\ only\\ 1\\-2\\ in\\ longer\\ drafts\\ when\\ they\\ clearly\\ help\\?",
+              "with": "Are decorative dash clusters removed while useful and sample-matched punctuation survives?",
+              "count": 1
+            },
+            {
+              "pattern": "Does\\ the\\ final\\ output\\ include\\ the\\ full\\ edited\\ draft\\ and\\ a\\ short\\ \\*\\*What\\ changed\\*\\*\\ section\\?",
+              "with": "Does the final output include the full edited draft once, with **What changed** only when edit notes were requested?",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rahul-eli5",
+      "repo": "rahulj51/eli5",
+      "plugin": "eli5-ste",
+      "author": "Rahul Jain",
+      "license": "MIT",
+      "description": "Task-scoped plain-language and executive explanations, plus explicitly requested Simplified Technical English.",
+      "copy": [
+        {
+          "from": "skills/eli5/SKILL.md",
+          "to": "skills/eli5/SKILL.md"
+        },
+        {
+          "from": "skills/ste/SKILL.md",
+          "to": "skills/ste/SKILL.md"
+        }
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "patches": [
+        {
+          "file": "skills/eli5/SKILL.md",
+          "upstream_commit": "43055a43a94f5508b74eb3ce31a103c55369aaf2",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below. Narrow implicit triggers, follow the requested language, preserve summary scope and required values, and soften list and reading-time caps (T3, T6, T10).",
+          "description": "Plain-language or executive version of specified content for the current task. Preserve necessary facts and qualifications. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from rahulj51/eli5 (MIT); reviewed base 43055a43a94f5508b74eb3ce31a103c55369aaf2. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nFollow the requested language, audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            },
+            {
+              "pattern": "\\#\\#\\ When\\ this\\ applies\\\n\\\n\\-\\ The\\ user\\ writes\\ \"eli5\"\\ anywhere\\ in\\ their\\ request\\.\\\n\\-\\ The\\ user\\ asks\\ for\\ a\\ simple,\\ plain\\-English,\\ shorter,\\ or\\ executive\\ version\\ of\\ something\\.\\\n\\-\\ It\\ works\\ on\\ any\\ content:\\ your\\ own\\ responses,\\ specs,\\ docs,\\ plans,\\ bug\\ reports,\\ code\\ review\\ comments,\\ incident\\ writeups\\.\\\n\\\n",
+              "with": "## When this applies\n\nUse for an explicit current-task simplification or executive-summary request about specified content. A quoted mention of eli5 or an unrelated heading is not a mode change.\n\n",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ Use\\ plain,\\ simple\\ English\\.\\ Prefer\\ short,\\ common\\ words\\.",
+              "with": "- Use the requested reply language; default to English when context supplies no other language. Prefer short, common words.",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ Lists\\ are\\ single\\ level\\ only\\.\\ Never\\ nest\\.\\ Each\\ item\\ is\\ one\\ or\\ two\\ short\\ sentences,\\ also\\ in\\ plain\\ English\\.",
+              "with": "- Prefer single-level lists and short items. Keep meaningful hierarchy, requested depth, and necessary coverage.",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ Numbers\\ and\\ names\\ that\\ change\\ the\\ reader's\\ decision\\.\\ Drop\\ the\\ rest\\.",
+              "with": "- In a requested summary, omit only details outside its required scope. Preserve every required fact and retained protected value exactly.",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ Longer\\ content\\ gets\\ a\\ one\\-line\\ summary\\ first,\\ then\\ a\\ flat\\ list\\.",
+              "with": "- Longer content starts with its main point, then uses the structure requested or needed for clarity.",
+              "count": 1
+            },
+            {
+              "pattern": "\\-\\ The\\ whole\\ thing\\ should\\ be\\ readable\\ in\\ under\\ a\\ minute\\.",
+              "with": "- Aim for a short read. Reading-time and length targets yield to requested coverage and necessary substance.",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "file": "skills/ste/SKILL.md",
+          "upstream_commit": "43055a43a94f5508b74eb3ce31a103c55369aaf2",
+          "conflicts": [
+            "T1",
+            "T3",
+            "T4",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "35",
+            "36",
+            "44"
+          ],
+          "why": "DESIGN.md D: narrow registration, allow explicit requests or router selection through the Skill tool, preserve meaning and protected spans, and limit the recipe to the current task. Body changes reconcile the source defaults below.",
+          "description": "Explicitly requested Simplified Technical English for specified technical content. Load only on explicit request or when the communication-stack router selects it.",
+          "replace": [
+            {
+              "pattern": "\\A\\n(#[^\\n]+\\n)",
+              "with": "\n\\1\n<!-- Adapted from rahulj51/eli5 (MIT); reviewed base 43055a43a94f5508b74eb3ce31a103c55369aaf2. Task scope and conflict rulings changed. -->\n\n## Context contract\n\nPreserve required facts, conditions, risks, and genuine uncertainty.\nKeep protected code, commands, paths, identifiers, data, errors, and quotations exact.\nAn explicit task may authorize changing engineering artifacts; speaking style cannot.\nThis explicitly requested STE transformation uses English. Follow the requested audience, structure, and output contract.\nPresentation limits yield to requested coverage and necessary substance.\nChat profiles do not override the voice or conventions of a requested artifact.\nIn chat, start with the requested answer and end on the same requested goal.\nGive a next action only when needed; omit redundant recap and hypothetical offers.\nWriter samples, meaningful existing voice, and useful punctuation outrank pattern defaults.\nThese instructions apply only to the current requested transformation or artifact.\nThey do not establish a session-wide mode or govern later unrelated tasks.\nThe context contract and explicit rules outrank conflicting illustrative examples.\n",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "talk-normal",
+      "repo": "hexiecs/talk-normal",
+      "plugin": "communication-stack",
+      "author": "hexie",
+      "license": "MIT",
+      "description": "Reference prompts adapted into the optional Stack Clear output style.",
+      "reference_only": true,
+      "license_dir": "skills/communication-stack/references/upstream/talk-normal",
+      "copy": [
+        {
+          "from": "prompt.md",
+          "to": "skills/communication-stack/references/upstream/talk-normal/prompt.md"
+        },
+        {
+          "from": "prompt-chatgpt.md",
+          "to": "skills/communication-stack/references/upstream/talk-normal/prompt-chatgpt.md"
+        }
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "ref": "main",
+      "category": "productivity",
+      "adaptations": [
+        {
+          "file": "plugins/communication-stack/output-styles/clear.md",
+          "why": "Owned adapter of this source under MIT, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+        }
+      ]
+    }
+  ],
+  "local_plugins": [
+    {
+      "plugin": "communication-stack",
+      "description": "A task router, context precedence, and four optional output styles: Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
+      "category": "productivity"
+    }
+  ]
+}
