@@ -2,7 +2,7 @@
 
 **Respostas objetivas, curtas e claras, sem desvio de assunto.** Um marketplace
 reúne receitas de comunicação existentes, resolve suas regras conflitantes e
-oferece quatro estilos opcionais. Preserva significado, voz do autor, conteúdo
+oferece cinco estilos opcionais. Preserva significado, voz do autor, conteúdo
 técnico exato e rigor de engenharia.
 
 [English](README.md)
@@ -43,7 +43,7 @@ vizinho: um plugin por upstream, mais o plugin de integração.
   talk-normal é registrado.
 
 O plugin **communication-stack** contém o roteador, a precedência, os conflitos
-e quatro estilos. O estilo **ELI5 é o arquivo escrito pelo usuário**, exatamente
+e cinco estilos. O estilo **ELI5 é o arquivo escrito pelo usuário**, exatamente
 a versão corrigida na seção B de DESIGN.md. É diferente da receita
 `eli5-ste:eli5` de Rahul.
 
@@ -74,7 +74,7 @@ Depois da publicação deste repositório, execute no Claude Code:
 ```
 
 Os plugins são independentes. Instalar só `communication-stack` fornece os
-quatro estilos. Instale os upstreams necessários ao roteador; se a fonte
+cinco estilos. Instale os upstreams necessários ao roteador; se a fonte
 escolhida estiver indisponível, ele informa qual falta sem trocar de editor
 silenciosamente.
 
@@ -121,10 +121,23 @@ Abra uma sessão nova depois da instalação.
 
 ## Escolher um estilo
 
-Use `/output-style` para listar os estilos ou `/config` → **Output style**:
+Estilos de plugin levam o nome do plugin na frente: escolha como
+`communication-stack:<nome>`, nunca só pelo nome. Use `/output-style` no CLI ou
+defina em `~/.claude/settings.json`:
 
+```json
+{ "outputStyle": "communication-stack:Stack Focus" }
+```
+
+O menu **Estilo de saída** do app desktop do Claude lista só os estilos nativos;
+nele, use o arquivo de settings. Conferido no Claude Code 2.1.294.
+
+- **Stack Focus**: junta Concise, ELI5, ADHD, Caveman Lite e Clear. Palavras
+  simples com jargão explicado na primeira vez, resposta primeiro, relatório em
+  três partes (o que fiz / funcionou? / o que fazer agora), todas as opções
+  relevantes com uma escolha, sem desvio de assunto. Padrão recomendado.
 - **Stack Clear**: conversa comum, resposta direta, contexto útil e fim sem
-  repetição. Ponto de partida recomendado.
+  repetição.
 - **ELI5**: palavras simples, respostas curtas, definições logo após termos
   difíceis e o mesmo rigor técnico. Os campos de relatório só valem para
   trabalho realizado; pedidos mais amplos superam a preferência por duas opções.
@@ -134,7 +147,7 @@ Use `/output-style` para listar os estilos ou `/config` → **Output style**:
   legível. É o nome da nossa adaptação; os aliases atuais lite/full do upstream
   usam a mesma skill base.
 
-Todos mantêm `keep-coding-instructions: true` e `force-for-plugin: false`.
+Os cinco mantêm `keep-coding-instructions: true` e `force-for-plugin: false`.
 Ativar o plugin respeita o estilo já selecionado. O manifesto usa a descoberta
 padrão em `output-styles/` e omite `outputStyles`, que substituiria essa busca.
 Veja a [documentação de estilos](https://code.claude.com/docs/en/output-styles)

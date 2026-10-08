@@ -6,7 +6,7 @@
       "name": "Jaime Basso",
       "url": "https://github.com/JaimeJunr"
     },
-    "description": "Objective, short, clear communication for Claude Code: one task recipe, four optional output styles, explicit conflict rulings, and no runtime hooks.",
+    "description": "Objective, short, clear communication for Claude Code: one task recipe, five optional output styles, explicit conflict rulings, and no runtime hooks.",
     "repository": "https://github.com/JaimeJunr/claude-code-communication-skills"
   },
   "sources": [
@@ -577,7 +577,7 @@
   "local_plugins": [
     {
       "plugin": "communication-stack",
-      "description": "A task router, context precedence, and four optional output styles: Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
+      "description": "A task router, context precedence, and five optional output styles: Stack Focus, Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
       "category": "productivity"
     }
   ]
