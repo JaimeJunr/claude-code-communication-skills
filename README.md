@@ -2,7 +2,7 @@
 
 **Objective, short, clear replies, with no topic drift.** One marketplace curates
 existing communication recipes, reconciles their conflicting rules, and offers
-four optional output styles. It preserves meaning, author voice, exact technical
+five optional output styles. It preserves meaning, author voice, exact technical
 payload, and engineering rigor.
 
 [Português](README.pt-BR.md)
@@ -42,7 +42,7 @@ per-upstream plugin layout of the sibling frontend marketplace.
   or talk-normal skill is registered.
 
 The owned **communication-stack** plugin contains the router, precedence rules,
-conflict rulings, and four styles. The **ELI5 output style is the user's own
+conflict rulings, and five styles. The **ELI5 output style is the user's own
 hand-written style**, exactly the fixed version in DESIGN.md section B. It is
 distinct from Rahul's `eli5-ste:eli5` recipe.
 
@@ -73,7 +73,7 @@ Once this repository is published, run in Claude Code:
 ```
 
 Each plugin is independent. Installing only `communication-stack` provides the
-four styles. Install the upstream plugins needed by the router; if its chosen
+five styles. Install the upstream plugins needed by the router; if its chosen
 source is unavailable, the router names it instead of silently switching editors.
 
 If you already installed an original upstream plugin, remove the duplicate copy.
@@ -119,10 +119,23 @@ Start a new session after installation.
 
 ## Pick one output style
 
-Run `/output-style` to list styles, or `/config` and choose **Output style**:
+Plugin styles are namespaced by plugin name: select them as
+`communication-stack:<name>`, never by the bare name. Run `/output-style` in the
+CLI, or set it in `~/.claude/settings.json`:
 
+```json
+{ "outputStyle": "communication-stack:Stack Focus" }
+```
+
+The Claude desktop app's **Output style** picker lists only built-in styles, so
+use the settings file there. Verified on Claude Code 2.1.294.
+
+- **Stack Focus**: combines Concise, ELI5, ADHD, Caveman Lite and Clear. Plain
+  words with jargon explained once, answer first, a three-part work report
+  (what I did / did it work / what to do now), every relevant option with a
+  pick, no drift. Recommended everyday default.
 - **Stack Clear**: ordinary chat; direct answers, useful context, no redundant
-  endings. Recommended starting point.
+  endings.
 - **ELI5**: small words, short answers, inline definitions, unchanged engineering
   rigor. Work-report slots apply to work reports; broader requests override its
   two-option preference.
@@ -132,7 +145,7 @@ Run `/output-style` to list styles, or `/config` and choose **Output style**:
   This is our adaptation name; upstream's current lite/full aliases both use
   the base caveman skill.
 
-All four keep `keep-coding-instructions: true` and `force-for-plugin: false`.
+All five keep `keep-coding-instructions: true` and `force-for-plugin: false`.
 Enabling the plugin respects the existing selection. Styles use the default
 `output-styles/` scan, so the manifest omits `outputStyles`, which would replace
 that scan. See the [output-style docs](https://code.claude.com/docs/en/output-styles)

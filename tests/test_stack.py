@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("stack_token_budget", ROOT / "scri
 token_budget = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(token_budget)
 
-STYLE_FILES = {"clear.md", "eli5.md", "adhd.md", "caveman-lite.md"}
+STYLE_FILES = {"clear.md", "eli5.md", "adhd.md", "caveman-lite.md", "focus.md"}
 PLUGIN_NAMES = {"communication-stack", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste"}
 
 
@@ -25,7 +25,7 @@ def styles():
 class StackContractTest(unittest.TestCase):
     def test_every_output_style_keeps_coding_and_never_forces_selection(self):
         candidates = styles()
-        self.assertTrue(candidates, "scanned 0 output styles; expected 4")
+        self.assertTrue(candidates, "scanned 0 output styles; expected 5")
         for path in candidates:
             with self.subTest(file=str(path.relative_to(ROOT))):
                 text = path.read_text()
@@ -39,11 +39,17 @@ class StackContractTest(unittest.TestCase):
                 self.assertIs(metadata.get("keep-coding-instructions"), True)
                 self.assertIs(metadata.get("force-for-plugin"), False)
 
-    def test_exactly_four_output_styles_exist(self):
+    def test_exactly_five_output_styles_exist(self):
         candidates = styles()
-        self.assertEqual(len(candidates), 4, f"scanned {len(candidates)} output styles; expected 4")
+        self.assertEqual(len(candidates), 5, f"scanned {len(candidates)} output styles; expected 5")
         self.assertEqual({path.name for path in candidates}, STYLE_FILES)
         self.assertEqual({path.parent.parent.name for path in candidates}, {"communication-stack"})
+
+    def test_focus_style_is_named_stack_focus(self):
+        path = ROOT / "plugins" / "communication-stack" / "output-styles" / "focus.md"
+        self.assertTrue(path.is_file(), f"{path}: missing")
+        metadata = yaml.safe_load(path.read_text().split("---\n", 2)[1])
+        self.assertEqual(metadata.get("name"), "Stack Focus")
 
     def test_no_plugin_ships_hooks(self):
         plugins = sorted(path for path in (ROOT / "plugins").glob("*") if path.is_dir())
@@ -83,7 +89,7 @@ class StackContractTest(unittest.TestCase):
         self.assertTrue(router.is_file(), "scanned 0 routers; expected communication-stack/SKILL.md")
         self.assertGreater(router.stat().st_size, 0)
         candidates = token_budget.budgeted_files(plugin)
-        self.assertEqual(len(candidates), 5, f"scanned {len(candidates)} budgeted files; expected router + 4 styles")
+        self.assertEqual(len(candidates), 6, f"scanned {len(candidates)} budgeted files; expected router + 5 styles")
         encoding = tiktoken.get_encoding("o200k_base")
         self.assertEqual(token_budget.over_budget(
             [plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
