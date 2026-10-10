@@ -11,7 +11,7 @@ payload, and engineering rigor.
 
 A brevity recipe can drop grammar; a simplifier can lose caveats; an editor can
 overwrite personal voice. Stacking them also adds competing instructions and
-input cost. This stack selects one recipe per task, distinguishes chat from
+input cost. This stack combines reply layers with a fixed precedence, distinguishes chat from
 publishable prose and machine text, and keeps every runtime hook out.
 
 The research and source evidence live in [DESIGN.md](docs/research/DESIGN.md)
@@ -156,39 +156,58 @@ one style's frontmatter `name` to avoid ambiguous selection.
 
 ## How to use the recipes
 
-Ask for a transformation; the router picks one primary recipe:
+The router's main job is fitting each reply to the reader. It works in three
+**reply layers**, one skill each, which combine:
 
-| Request | Recipe |
+| Layer | Skill | Changes |
+|---|---|---|
+| Words | `eli5-ste:eli5` | how plain the vocabulary is |
+| Structure | `i-have-adhd:i-have-adhd` | order, steps, one next action |
+| Length | `caveman:caveman` | cuts spare words |
+
+When they disagree: correctness, then understanding, then order, then
+shortness. Saying how you are picks the layers:
+
+| You say | Layers |
 |---|---|
-| Edit my supplied draft while keeping my voice | `no-ai-slop:no-ai-slop` |
-| Substantially rewrite AI-sounding prose | `humanizer:humanizer` |
-| Audit patterns without rewriting | `no-ai-slop:no-ai-slop`, detect mode |
-| Plain-language/executive version of specified content | `eli5-ste:eli5` |
-| Explicit Simplified Technical English | `eli5-ste:ste` |
-| Action-first formatting for this task | `i-have-adhd:i-have-adhd` |
-| Brevity pass for this task | `caveman:caveman` |
+| "I'm confused" | Words: re-explain the last answer |
+| "I'm tired", "my head is full" | Words + Structure + Length |
+| Confused and tired | Words + Structure |
+| "It's another day, I lost the context" | four-line recap, plus any other state's layers |
+| "Just tell me", "quick" | Length |
+| "I'm stuck", "what now?" | Structure: one next action |
+| "Again?", "it doesn't work" | Structure + Length: what went wrong, then the fix |
+| "I'm on my phone" | Structure + Length, no tables |
+| "Explain it properly" | turns Length off |
+| "Back to normal" | turns all layers off |
 
-Or invoke a leaf directly, such as `/no-ai-slop:no-ai-slop`,
-`/humanizer:humanizer`, or `/eli5-ste:eli5`. A named source wins over the default.
+An explicit statement acts at once; an implicit signal (the same question
+twice) needs two in a row. A state lasts until you say otherwise. See the
+router's Reader state table for the full list.
 
-All six leaf skills remain model-invocable with narrow descriptions: load only
-on explicit request or when the communication-stack router selects one.
-The router invokes the chosen namespaced skill through the Skill tool, loading
-only that recipe. Never invoke more than one editor per task. If its plugin is
-not installed, report that and give `/plugin install <name>@communication-stack`.
+For a **draft** you will publish or send, editors are picked by destination.
+Only one editor rewrites; when two are used, `no-ai-slop` only detects and
+`humanizer` rewrites once:
 
-Recipes apply to the current task or artifact only. They do not change the
-selected style or govern later unrelated tasks. No editor runs on routine chat,
-code review, or engineering work merely because it produces prose.
+| Destination | Editors |
+|---|---|
+| Site, landing page, product copy, docs | `no-ai-slop` edit mode, neutral tone, no humanizing |
+| Email, Slack, message to a person | `no-ai-slop` detect, then `humanizer` |
+| Your own draft where your voice matters | `no-ai-slop` edit mode, minimum edits |
+| Heavily AI-sounding text | `humanizer` full rewrite |
+
+You can also invoke a skill directly, such as `/no-ai-slop:no-ai-slop`. A named
+skill wins over the defaults. If a plugin is missing, the router says so and
+gives `/plugin install <name>@communication-stack`.
 
 ## Conflict rulings
 
 The router holds three precedence ladders:
 
-- **Chat:** current user request/language/output contract → current-task recipe
+- **Chat:** current user request/language/output contract → active reply layers
   → selected output style → generic brevity.
 - **Publishable prose:** brief/audience/output contract → writer sample and
-  existing voice → one editor → editor defaults.
+  existing voice → editors for the destination → editor defaults.
 - **Machine text:** schema/project syntax/verbatim contract → project conventions
   for new content. Style changes surrounding prose only.
 
