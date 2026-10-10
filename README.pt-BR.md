@@ -158,6 +158,12 @@ o `name` de um dos estilos para evitar ambiguidade.
 
 ## Usar as receitas
 
+Dizer como você está também leva a uma ação fixa: "não entendi" explica de
+novo a última resposta com `eli5-ste:eli5`; "tô cansado" mostra só o que
+importa agora com `i-have-adhd:i-have-adhd`; "é outro dia, perdi o contexto"
+gera um resumo em quatro linhas (objetivo, feito, onde parou, próximo passo).
+Sinais misturados: contexto perdido, depois confusão, depois cansaço.
+
 Peça uma transformação; o roteador escolhe uma receita principal:
 
 | Pedido | Receita |

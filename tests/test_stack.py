@@ -165,3 +165,39 @@ class StackContractTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StateRoutingAndFocusRulesTest(unittest.TestCase):
+    ROUTER = ROOT / "plugins" / "communication-stack" / "skills" / "communication-stack" / "SKILL.md"
+    FOCUS = ROOT / "plugins" / "communication-stack" / "output-styles" / "focus.md"
+
+    def router_parts(self):
+        text = self.ROUTER.read_text()
+        metadata = yaml.safe_load(text.split("---\n", 2)[1])
+        return metadata["description"], text
+
+    def test_router_description_triggers_on_reader_states(self):
+        description, _ = self.router_parts()
+        for cue in ("confused", "tired", "lost context"):
+            with self.subTest(cue=cue):
+                self.assertIn(cue, description)
+
+    def test_router_maps_each_reader_state_to_one_fixed_action(self):
+        _, text = self.router_parts()
+        self.assertIn("## Reader state", text)
+        section = text.split("## Reader state", 1)[1].split("\n## ", 1)[0]
+        rows = [line for line in section.splitlines() if line.startswith("| ") and "---" not in line][1:]
+        self.assertEqual(len(rows), 3, f"scanned {len(rows)} state rows; expected 3")
+        actions = {row.split("|")[1].strip(): row.split("|")[2].strip() for row in rows}
+        self.assertIn("`eli5-ste:eli5`", " ".join(v for k, v in actions.items() if "Confused" in k))
+        self.assertIn("`i-have-adhd:i-have-adhd`", " ".join(v for k, v in actions.items() if "Tired" in k))
+        self.assertIn("no recipe", " ".join(v for k, v in actions.items() if "Lost context" in k))
+        self.assertIn("Lost context, then confused, then tired", section)
+
+    def test_focus_style_carries_the_round_two_rules(self):
+        text = " ".join(self.FOCUS.read_text().split())
+        for rule in ("No label stamps", "Resumo:", "unless the user already used it",
+                     "list exactly that many", "list problems first", "3 most important points",
+                     "one short sentence"):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, text)

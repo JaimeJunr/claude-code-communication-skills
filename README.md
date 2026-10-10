@@ -156,6 +156,12 @@ one style's frontmatter `name` to avoid ambiguous selection.
 
 ## How to use the recipes
 
+Saying how you feel also routes to a fixed action: "I'm confused" re-explains
+the last answer with `eli5-ste:eli5`; "I'm tired" gives only what matters now
+with `i-have-adhd:i-have-adhd`; "it's another day, I lost the context" gets a
+four-line recap (goal, done, where it stopped, next step). Mixed signals:
+lost context, then confused, then tired.
+
 Ask for a transformation; the router picks one primary recipe:
 
 | Request | Recipe |
