@@ -158,44 +158,56 @@ o `name` de um dos estilos para evitar ambiguidade.
 
 ## Usar as receitas
 
-Dizer como você está também leva a uma ação fixa: "não entendi" explica de
-novo a última resposta com `eli5-ste:eli5`; "tô cansado" mostra só o que
-importa agora com `i-have-adhd:i-have-adhd`; "é outro dia, perdi o contexto"
-gera um resumo em quatro linhas (objetivo, feito, onde parou, próximo passo).
-Sinais misturados: contexto perdido, depois confusão, depois cansaço.
+A função principal do roteador é ajustar cada resposta a quem lê. Ele trabalha
+em três **camadas de resposta**, uma skill cada, que se combinam:
 
-Peça uma transformação; o roteador escolhe uma receita principal:
+| Camada | Skill | Muda |
+|---|---|---|
+| Palavras | `eli5-ste:eli5` | quão simples é o vocabulário |
+| Estrutura | `i-have-adhd:i-have-adhd` | ordem, passos, um próximo passo |
+| Tamanho | `caveman:caveman` | corta palavra sobrando |
 
-| Pedido | Receita |
+Quando discordam: correção, depois entendimento, depois ordem, depois
+tamanho. Dizer como você está escolhe as camadas:
+
+| Você diz | Camadas |
 |---|---|
-| Editar um rascunho mantendo minha voz | `no-ai-slop:no-ai-slop` |
-| Reescrever substancialmente prosa com padrões artificiais | `humanizer:humanizer` |
-| Auditar padrões sem reescrever | `no-ai-slop:no-ai-slop`, modo detect |
-| Versão simples ou executiva de conteúdo específico | `eli5-ste:eli5` |
-| Simplified Technical English explicitamente solicitado | `eli5-ste:ste` |
-| Formatação com ação primeiro nesta tarefa | `i-have-adhd:i-have-adhd` |
-| Passagem de brevidade nesta tarefa | `caveman:caveman` |
+| "não entendi" | Palavras: explica de novo a última resposta |
+| "tô cansado", "cabeça cheia" | Palavras + Estrutura + Tamanho |
+| Confuso e cansado | Palavras + Estrutura |
+| "é outro dia, perdi o contexto" | resumo em quatro linhas, mais as camadas de outro estado presente |
+| "só me diz", "rápido" | Tamanho |
+| "travei", "e agora?" | Estrutura: um próximo passo |
+| "de novo?", "não funciona" | Estrutura + Tamanho: o que deu errado, depois o conserto |
+| "tô no celular" | Estrutura + Tamanho, sem tabelas |
+| "explica direito" | desliga Tamanho |
+| "pode voltar ao normal" | desliga todas as camadas |
 
-Também pode chamar `/no-ai-slop:no-ai-slop`, `/humanizer:humanizer` ou
-`/eli5-ste:eli5` diretamente. Uma fonte pedida pelo usuário supera o padrão.
+Uma frase explícita age na hora; um sinal implícito (a mesma pergunta duas
+vezes) precisa aparecer duas vezes seguidas. O estado dura até você dizer o
+contrário. A lista completa está na tabela Reader state do roteador.
 
-As seis receitas continuam invocáveis pelo modelo, com descrições restritas:
-carregam apenas por pedido explícito ou quando o roteador communication-stack
-seleciona uma delas. O roteador chama a skill pelo nome com namespace usando a
-ferramenta Skill e carrega somente essa receita. Nunca invoque mais de um editor
-por tarefa. Se o plugin não estiver instalado, informe isso e dê
+Para um **rascunho** que você vai publicar ou enviar, os editores dependem do
+destino. Só um editor reescreve; quando são dois, o `no-ai-slop` só aponta e o
+`humanizer` reescreve uma vez:
+
+| Destino | Editores |
+|---|---|
+| Site, landing page, texto de produto, documentação | `no-ai-slop` em modo edição, tom neutro, sem humanizar |
+| E-mail, Slack, mensagem pra uma pessoa | `no-ai-slop` aponta, depois `humanizer` |
+| Rascunho seu em que sua voz importa | `no-ai-slop` em modo edição, mudanças mínimas |
+| Texto com muita cara de IA | `humanizer` reescreve tudo |
+
+Também dá pra chamar uma skill direto, como `/no-ai-slop:no-ai-slop`. Uma skill
+pedida pelo nome vence os padrões. Se faltar um plugin, o roteador avisa e dá
 `/plugin install <name>@communication-stack`.
-
-A receita vale apenas para a tarefa ou artefato atual. Não muda o estilo
-selecionado nem governa tarefas posteriores. Conversas comuns, code reviews e
-trabalho de engenharia não carregam editores só por produzirem prosa.
 
 ## Regras de conflito
 
-- **Conversa:** pedido/idioma/contrato de saída atual → receita da tarefa →
+- **Conversa:** pedido/idioma/contrato de saída atual → camadas ativas →
   estilo selecionado → brevidade genérica.
 - **Prosa publicável:** briefing/público/contrato → amostra e voz do autor →
-  um editor → padrões do editor.
+  editores do destino → padrões do editor.
 - **Texto de máquina:** esquema/sintaxe/contrato literal → convenções do projeto
   para conteúdo novo. O estilo só muda a prosa ao redor.
 

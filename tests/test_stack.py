@@ -110,16 +110,16 @@ class StackContractTest(unittest.TestCase):
                       if "disable-model-invocation" in json.dumps(patch)]
         self.assertEqual(violations, [], f"scanned {len(candidates)} patches; violations: {violations}")
 
-    def test_router_invokes_one_namespaced_skill_without_install_path_discovery(self):
+    def test_router_invokes_namespaced_skills_without_install_path_discovery(self):
         router = ROOT / "plugins/communication-stack/skills/communication-stack/SKILL.md"
         self.assertTrue(router.is_file(), "scanned 0 routers; expected 1")
         text = router.read_text()
         forbidden = ("installed_plugins.json", "installPath", "claude plugin list")
         violations = [term for term in forbidden if term in text]
         self.assertEqual(violations, [], f"scanned 1 router for {len(forbidden)} terms; violations: {violations}")
-        self.assertIn("Invoke the chosen skill via the Skill tool", text)
+        self.assertIn("Invoke each listed skill via the Skill tool", " ".join(text.split()))
         self.assertIn("namespaced name", text)
-        self.assertIn("Never invoke more than one editor per task", text)
+        self.assertIn("Only one editor rewrites", " ".join(text.split()))
         self.assertIn("/plugin install <name>@communication-stack", text)
 
     def test_leaf_descriptions_require_explicit_request_or_router_selection(self):
@@ -178,21 +178,68 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
 
     def test_router_description_triggers_on_reader_states(self):
         description, _ = self.router_parts()
-        for cue in ("confused", "tired", "lost context"):
+        for cue in ("confused", "tired", "lost context", "hurry", "stuck", "frustrated",
+                    "small screen", "depth"):
             with self.subTest(cue=cue):
                 self.assertIn(cue, description)
 
-    def test_router_maps_each_reader_state_to_one_fixed_action(self):
+    def section(self, title):
         _, text = self.router_parts()
-        self.assertIn("## Reader state", text)
-        section = text.split("## Reader state", 1)[1].split("\n## ", 1)[0]
-        rows = [line for line in section.splitlines() if line.startswith("| ") and "---" not in line][1:]
-        self.assertEqual(len(rows), 3, f"scanned {len(rows)} state rows; expected 3")
-        actions = {row.split("|")[1].strip(): row.split("|")[2].strip() for row in rows}
-        self.assertIn("`eli5-ste:eli5`", " ".join(v for k, v in actions.items() if "Confused" in k))
-        self.assertIn("`i-have-adhd:i-have-adhd`", " ".join(v for k, v in actions.items() if "Tired" in k))
-        self.assertIn("no recipe", " ".join(v for k, v in actions.items() if "Lost context" in k))
-        self.assertIn("Lost context, then confused, then tired", section)
+        self.assertIn(f"## {title}", text)
+        return text.split(f"## {title}", 1)[1].split("\n## ", 1)[0]
+
+    def table_rows(self, title):
+        rows = [line for line in self.section(title).splitlines()
+                if line.startswith("| ") and "---" not in line][1:]
+        return {row.split("|")[1].strip(): row.split("|")[2].strip() for row in rows}
+
+    def test_reply_layers_are_one_skill_each(self):
+        layers = self.table_rows("Reply layers")
+        self.assertEqual(set(layers), {"Words", "Structure", "Length"})
+        self.assertIn("`eli5-ste:eli5`", layers["Words"])
+        self.assertIn("`i-have-adhd:i-have-adhd`", layers["Structure"])
+        self.assertIn("`caveman:caveman`", layers["Length"])
+        self.assertIn("correctness, then understanding", " ".join(self.section("Reply layers").split()))
+
+    def test_reader_states_map_to_layer_combinations(self):
+        states = self.table_rows("Reader state")
+        self.assertGreaterEqual(len(states), 10, f"scanned {len(states)} states; expected at least 10")
+        allowed = {"`eli5-ste:eli5`", "`i-have-adhd:i-have-adhd`", "`caveman:caveman`"}
+
+        def skills(prefix):
+            [row] = [v for k, v in states.items() if k.startswith(prefix)]
+            return {token for token in allowed if token in row}
+
+        self.assertEqual(skills("Confused (\""), {"`eli5-ste:eli5`"})
+        self.assertEqual(skills("Tired"), allowed)
+        self.assertEqual(skills("Confused and tired"), {"`eli5-ste:eli5`", "`i-have-adhd:i-have-adhd`"})
+        self.assertEqual(skills("In a hurry"), {"`caveman:caveman`"})
+        self.assertEqual(skills("Back to normal"), set())
+
+    def test_reader_state_has_persistence_and_signal_rules(self):
+        text = " ".join(self.section("Reader state").split())
+        for rule in ("Lost context first", "needs two in a row", "Never guess a state",
+                     "until the reader says otherwise", "Do not announce the layers"):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, text)
+
+    def test_drafts_pick_editors_by_destination(self):
+        editors = self.table_rows("Edit a draft")
+        self.assertGreaterEqual(len(editors), 4, f"scanned {len(editors)} destinations; expected at least 4")
+
+        def row(prefix):
+            [value] = [v for k, v in editors.items() if k.startswith(prefix)]
+            return value
+
+        site = row("Site")
+        self.assertIn("`no-ai-slop:no-ai-slop`", site)
+        self.assertNotIn("`humanizer:humanizer`", site)
+        email = row("Email")
+        self.assertLess(email.index("`no-ai-slop:no-ai-slop` detect"), email.index("`humanizer:humanizer`"),
+                        "email: no-ai-slop must detect before humanizer rewrites")
+        text = " ".join(self.section("Edit a draft").split())
+        self.assertIn("Only one editor rewrites", text)
+        self.assertIn("ask once", text)
 
     def test_focus_style_carries_the_round_two_rules(self):
         text = " ".join(self.FOCUS.read_text().split())
