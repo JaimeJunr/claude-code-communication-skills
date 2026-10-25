@@ -6,7 +6,7 @@
       "name": "Jaime Basso",
       "url": "https://github.com/JaimeJunr"
     },
-    "description": "Objective, short, clear communication for Claude Code: one task recipe, five optional output styles, explicit conflict rulings, and no runtime hooks.",
+    "description": "Objective, short, clear communication for Claude Code: one task recipe, one output style, explicit conflict rulings, and no runtime hooks.",
     "repository": "https://github.com/JaimeJunr/claude-code-communication-skills"
   },
   "sources": [
@@ -130,8 +130,8 @@
       ],
       "adaptations": [
         {
-          "file": "plugins/communication-stack/output-styles/caveman-lite.md",
-          "why": "Owned adapter of this source under Apache-2.0, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+          "file": "plugins/communication-stack/output-styles/focus.md",
+          "why": "Owned adapter of this source under Apache-2.0; Stack Focus combines ideas from it; maintained by hand."
         }
       ]
     },
@@ -233,8 +233,8 @@
       ],
       "adaptations": [
         {
-          "file": "plugins/communication-stack/output-styles/adhd.md",
-          "why": "Owned adapter of this source under MIT, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+          "file": "plugins/communication-stack/output-styles/focus.md",
+          "why": "Owned adapter of this source under MIT; Stack Focus combines ideas from it; maintained by hand."
         }
       ]
     },
@@ -548,7 +548,7 @@
       "plugin": "communication-stack",
       "author": "hexie",
       "license": "MIT",
-      "description": "Reference prompts adapted into the optional Stack Clear output style.",
+      "description": "Reference prompts adapted into the Stack Focus output style.",
       "reference_only": true,
       "license_dir": "skills/communication-stack/references/upstream/talk-normal",
       "copy": [
@@ -568,8 +568,8 @@
       "category": "productivity",
       "adaptations": [
         {
-          "file": "plugins/communication-stack/output-styles/clear.md",
-          "why": "Owned adapter of this source under MIT, reconciled with DESIGN.md D for readable grammar, complete coverage, protected text, and optional selection; maintained by hand."
+          "file": "plugins/communication-stack/output-styles/focus.md",
+          "why": "Owned adapter of this source under MIT; Stack Focus combines ideas from it; maintained by hand."
         }
       ]
     }
@@ -577,7 +577,7 @@
   "local_plugins": [
     {
       "plugin": "communication-stack",
-      "description": "A task router, context precedence, and five optional output styles: Stack Focus, Stack Clear, ELI5, Stack ADHD, and Stack Caveman Lite.",
+      "description": "A task router, context precedence, and one output style: Stack Focus.",
       "category": "productivity"
     }
   ]

@@ -2,7 +2,7 @@
 
 **Objective, short, clear replies, with no topic drift.** One marketplace curates
 existing communication recipes, reconciles their conflicting rules, and offers
-five optional output styles. It preserves meaning, author voice, exact technical
+one output style, Stack Focus. It preserves meaning, author voice, exact technical
 payload, and engineering rigor.
 
 [Português](README.pt-BR.md)
@@ -37,14 +37,13 @@ per-upstream plugin layout of the sibling frontend marketplace.
   task-specific executive/plain-language explanations and explicitly requested
   Simplified Technical English, packaged as `eli5-ste`. MIT.
 - [hexiecs/talk-normal](https://github.com/hexiecs/talk-normal):
-  the compact prompt is adapted into Stack Clear. Both original prompts and the
+  the compact prompt is adapted into Stack Focus. Both original prompts and the
   MIT license are reference-only copies inside the owned plugin. No installer
   or talk-normal skill is registered.
 
 The owned **communication-stack** plugin contains the router, precedence rules,
-conflict rulings, and five styles. The **ELI5 output style is the user's own
-hand-written style**, exactly the fixed version in DESIGN.md section B. It is
-distinct from Rahul's `eli5-ste:eli5` recipe.
+conflict rulings, and one output style, Stack Focus. Stack Focus is the user's
+own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
 
 <!-- SKILLS:START -->
 | Plugin | Skills | Count |
@@ -73,7 +72,7 @@ Once this repository is published, run in Claude Code:
 ```
 
 Each plugin is independent. Installing only `communication-stack` provides the
-five styles. Install the upstream plugins needed by the router; if its chosen
+Stack Focus style. Install the upstream plugins needed by the router; if its chosen
 source is unavailable, the router names it instead of silently switching editors.
 
 If you already installed an original upstream plugin, remove the duplicate copy.
@@ -130,29 +129,17 @@ CLI, or set it in `~/.claude/settings.json`:
 The Claude desktop app's **Output style** picker lists only built-in styles, so
 use the settings file there. Verified on Claude Code 2.1.294.
 
-- **Stack Focus**: combines Concise, ELI5, ADHD, Caveman Lite and Clear. Plain
-  words with jargon explained once, answer first, a three-part work report
-  (what I did / did it work / what to do now), every relevant option with a
-  pick, no drift. Recommended everyday default.
-- **Stack Clear**: ordinary chat; direct answers, useful context, no redundant
-  endings.
-- **ELI5**: small words, short answers, inline definitions, unchanged engineering
-  rigor. Work-report slots apply to work reports; broader requests override its
-  two-option preference.
-- **Stack ADHD**: action-first answers, bounded numbered steps, useful progress,
-  and small visible groups without losing requested items.
-- **Stack Caveman Lite**: experimental brevity with complete, readable grammar.
-  This is our adaptation name; upstream's current lite/full aliases both use
-  the base caveman skill.
+- **Stack Focus**: the only style shipped, built from ideas of Concise, ELI5,
+  ADHD, Caveman Lite and Clear. Plain words with project terms explained once,
+  answer first, a three-part work report (what I did / did it work / what to do
+  now), every relevant option with a pick, links instead of bare ids, a closing
+  line that stands alone, and visuals only when they do what text cannot.
 
-All five keep `keep-coding-instructions: true` and `force-for-plugin: false`.
+Stack Focus keeps `keep-coding-instructions: true` and `force-for-plugin: false`.
 Enabling the plugin respects the existing selection. Styles use the default
 `output-styles/` scan, so the manifest omits `outputStyles`, which would replace
 that scan. See the [output-style docs](https://code.claude.com/docs/en/output-styles)
 and [plugin manifest reference](https://code.claude.com/docs/en/plugins-reference).
-
-If you also keep `~/.claude/output-styles/eli5.md` with the name **ELI5**, rename
-one style's frontmatter `name` to avoid ambiguous selection.
 
 ## How to use the recipes
 
@@ -291,10 +278,9 @@ Implement [DESIGN.md section E](docs/research/DESIGN.md#e-biggest-risk-and-cheap
   4 explanations, 3 publishable prose, and 3 machine-text cases. Specify expected
   facts, protected spans, and required coverage before scoring. Include a later
   unrelated task after a recipe loads to test scope leakage.
-- [ ] Compare Default, built-in Concise, Stack Clear, and owned ELI5 under the
-  same model/settings/tools/turn budget: **80 case runs**. Add **5 matched cases
-  each** for Stack ADHD and Stack Caveman Lite: **90 initial case runs** total,
-  plus the prescribed extra conversation turns. Repeat ambiguous results only.
+- [ ] Compare Default, built-in Concise, and Stack Focus under the same
+  model/settings/tools/turn budget: **60 case runs**, plus the prescribed extra
+  conversation turns. Repeat ambiguous results only.
 - [ ] Record chat/artifact median and longest word counts, answer-first,
   same-goal endings, completeness/accuracy, byte-exact protected spans,
   final-only contracts, selected recipe, and blind paired human voice/readability

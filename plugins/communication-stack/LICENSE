@@ -3,7 +3,7 @@ MIT License
 Copyright (c) 2026 Jaime Basso
 
 This license covers the original work in this repository: the
-original communication-stack router, the owned ELI5 output style, scripts/,
+original communication-stack router, the owned Stack Focus output style, scripts/,
 and documentation. Copied upstream recipes, reference prompts, and adapted
 output styles retain their own upstream licenses; see THIRD_PARTY_NOTICES.md.
 

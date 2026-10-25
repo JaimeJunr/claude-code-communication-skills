@@ -70,7 +70,9 @@ These add delegation, installation/help, telemetry, Cloud operations, optimizati
 
 ### One selected output style; one recipe per task
 
-Ship exactly four output styles:
+> Update: only Stack Focus ships now. The four styles below were removed because only Focus was in use. The table is kept as design history.
+
+Originally four output styles were planned:
 
 | Frontmatter name | File | Purpose and source |
 |---|---|---|
