@@ -2,7 +2,7 @@
 
 **Respostas objetivas, curtas e claras, sem desvio de assunto.** Um marketplace
 reúne receitas de comunicação existentes, resolve suas regras conflitantes e
-oferece cinco estilos opcionais. Preserva significado, voz do autor, conteúdo
+oferece um estilo de saída, o Stack Focus. Preserva significado, voz do autor, conteúdo
 técnico exato e rigor de engenharia.
 
 [English](README.md)
@@ -38,14 +38,13 @@ vizinho: um plugin por upstream, mais o plugin de integração.
   em linguagem simples e Simplified Technical English solicitado explicitamente.
   O plugin se chama `eli5-ste`. MIT.
 - [hexiecs/talk-normal](https://github.com/hexiecs/talk-normal): o prompt
-  compacto é adaptado no Stack Clear. Os dois prompts originais e a licença
+  compacto é adaptado no Stack Focus. Os dois prompts originais e a licença
   MIT ficam como referências no plugin próprio. Nenhum instalador ou skill
   talk-normal é registrado.
 
 O plugin **communication-stack** contém o roteador, a precedência, os conflitos
-e cinco estilos. O estilo **ELI5 é o arquivo escrito pelo usuário**, exatamente
-a versão corrigida na seção B de DESIGN.md. É diferente da receita
-`eli5-ste:eli5` de Rahul.
+e um estilo de saída, o Stack Focus, escrito pelo usuário. É diferente da
+receita `eli5-ste:eli5` de Rahul.
 
 <!-- SKILLS:START -->
 | Plugin | Skills | Quantidade |
@@ -73,8 +72,8 @@ Depois da publicação deste repositório, execute no Claude Code:
 /plugin install eli5-ste@communication-stack
 ```
 
-Os plugins são independentes. Instalar só `communication-stack` fornece os
-cinco estilos. Instale os upstreams necessários ao roteador; se a fonte
+Os plugins são independentes. Instalar só `communication-stack` fornece o
+estilo Stack Focus. Instale os upstreams necessários ao roteador; se a fonte
 escolhida estiver indisponível, ele informa qual falta sem trocar de editor
 silenciosamente.
 
@@ -132,29 +131,18 @@ defina em `~/.claude/settings.json`:
 O menu **Estilo de saída** do app desktop do Claude lista só os estilos nativos;
 nele, use o arquivo de settings. Conferido no Claude Code 2.1.294.
 
-- **Stack Focus**: junta Concise, ELI5, ADHD, Caveman Lite e Clear. Palavras
-  simples com jargão explicado na primeira vez, resposta primeiro, relatório em
-  três partes (o que fiz / funcionou? / o que fazer agora), todas as opções
-  relevantes com uma escolha, sem desvio de assunto. Padrão recomendado.
-- **Stack Clear**: conversa comum, resposta direta, contexto útil e fim sem
-  repetição.
-- **ELI5**: palavras simples, respostas curtas, definições logo após termos
-  difíceis e o mesmo rigor técnico. Os campos de relatório só valem para
-  trabalho realizado; pedidos mais amplos superam a preferência por duas opções.
-- **Stack ADHD**: resposta ou ação primeiro, passos numerados delimitados,
-  progresso útil e grupos pequenos sem apagar itens necessários.
-- **Stack Caveman Lite**: brevidade experimental com gramática completa e
-  legível. É o nome da nossa adaptação; os aliases atuais lite/full do upstream
-  usam a mesma skill base.
+- **Stack Focus**: o único estilo entregue, feito de ideias do Concise, ELI5,
+  ADHD, Caveman Lite e Clear. Palavras simples com termos do projeto explicados
+  na primeira vez, resposta primeiro, relatório em três partes (o que fiz /
+  funcionou? / o que fazer agora), todas as opções relevantes com uma escolha,
+  links no lugar de ids soltos, uma última linha que se sustenta sozinha e
+  visual só quando faz o que o texto não faz.
 
-Os cinco mantêm `keep-coding-instructions: true` e `force-for-plugin: false`.
+O Stack Focus mantém `keep-coding-instructions: true` e `force-for-plugin: false`.
 Ativar o plugin respeita o estilo já selecionado. O manifesto usa a descoberta
 padrão em `output-styles/` e omite `outputStyles`, que substituiria essa busca.
 Veja a [documentação de estilos](https://code.claude.com/docs/en/output-styles)
 e a [referência do manifesto](https://code.claude.com/docs/en/plugins-reference).
-
-Se também mantiver `~/.claude/output-styles/eli5.md` com o nome **ELI5**, renomeie
-o `name` de um dos estilos para evitar ambiguidade.
 
 ## Usar as receitas
 
@@ -292,11 +280,9 @@ Implementar a [seção E de DESIGN.md](docs/research/DESIGN.md#e-biggest-risk-an
   4 explicações, 3 textos publicáveis e 3 casos de texto de máquina. Definir
   fatos esperados, trechos protegidos e cobertura antes da pontuação. Incluir
   uma tarefa posterior não relacionada para detectar vazamento de escopo.
-- [ ] Comparar Default, Concise nativo, Stack Clear e ELI5 próprio com o mesmo
-  modelo, parâmetros, ferramentas e orçamento: **80 execuções**. Acrescentar
-  **5 casos pareados por estilo** para Stack ADHD e Stack Caveman Lite:
-  **90 execuções iniciais**, mais os turnos previstos. Repetir só resultados
-  ambíguos.
+- [ ] Comparar Default, Concise nativo e Stack Focus com o mesmo modelo,
+  parâmetros, ferramentas e orçamento: **60 execuções**, mais os turnos
+  previstos. Repetir só resultados ambíguos.
 - [ ] Medir mediana e maior resposta em palavras por conversa/artefato, resposta
   primeiro, desvio de objetivo, completude/precisão, bytes protegidos, contrato
   final-only, receita escolhida e avaliação humana cega de voz/legibilidade.

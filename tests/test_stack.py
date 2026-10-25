@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("stack_token_budget", ROOT / "scri
 token_budget = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(token_budget)
 
-STYLE_FILES = {"clear.md", "eli5.md", "adhd.md", "caveman-lite.md", "focus.md"}
+STYLE_FILES = {"focus.md"}
 PLUGIN_NAMES = {"communication-stack", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste"}
 
 
@@ -39,9 +39,9 @@ class StackContractTest(unittest.TestCase):
                 self.assertIs(metadata.get("keep-coding-instructions"), True)
                 self.assertIs(metadata.get("force-for-plugin"), False)
 
-    def test_exactly_five_output_styles_exist(self):
+    def test_exactly_one_output_style_exists(self):
         candidates = styles()
-        self.assertEqual(len(candidates), 5, f"scanned {len(candidates)} output styles; expected 5")
+        self.assertEqual(len(candidates), 1, f"scanned {len(candidates)} output styles; expected 1")
         self.assertEqual({path.name for path in candidates}, STYLE_FILES)
         self.assertEqual({path.parent.parent.name for path in candidates}, {"communication-stack"})
 
@@ -89,7 +89,7 @@ class StackContractTest(unittest.TestCase):
         self.assertTrue(router.is_file(), "scanned 0 routers; expected communication-stack/SKILL.md")
         self.assertGreater(router.stat().st_size, 0)
         candidates = token_budget.budgeted_files(plugin)
-        self.assertEqual(len(candidates), 6, f"scanned {len(candidates)} budgeted files; expected router + 5 styles")
+        self.assertEqual(len(candidates), 2, f"scanned {len(candidates)} budgeted files; expected router + 1 style")
         encoding = tiktoken.get_encoding("o200k_base")
         self.assertEqual(token_budget.over_budget(
             [plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
@@ -131,13 +131,6 @@ class StackContractTest(unittest.TestCase):
                 metadata = yaml.safe_load(path.read_text().split("---\n", 2)[1])
                 self.assertIn("Load only on explicit request or when the communication-stack router selects it.",
                               metadata["description"])
-
-    def test_owned_eli5_is_exactly_the_fixed_design_version(self):
-        design = (ROOT / "docs/research/DESIGN.md").read_text()
-        section = design.split("### Our hand-written ELI5 output style", 1)[1].split("### Router and manual recipes", 1)[0]
-        expected = re.search(r"~~~markdown\n(.*?)\n~~~", section, re.S).group(1) + "\n"
-        path = ROOT / "plugins/communication-stack/output-styles/eli5.md"
-        self.assertEqual(path.read_text(), expected)
 
     def test_lock_covers_sources_and_verbatim_copies(self):
         stack = json.loads((ROOT / "stack.json").read_text())
