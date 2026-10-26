@@ -42,14 +42,17 @@ vizinho: um plugin por upstream, mais o plugin de integração.
   MIT ficam como referências no plugin próprio. Nenhum instalador ou skill
   talk-normal é registrado.
 
-O plugin **communication-stack** contém o roteador, a precedência, os conflitos
-e um estilo de saída, o Stack Focus, escrito pelo usuário. É diferente da
+O plugin **communication-stack** contém só o estilo de saída, o Stack Focus,
+escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta). O
+plugin opcional **communication-router** guarda o roteador, a precedência e os
+conflitos. É diferente da
 receita `eli5-ste:eli5` de Rahul.
 
 <!-- SKILLS:START -->
 | Plugin | Skills | Quantidade |
 |---|---|---|
-| `communication-stack` | `communication-stack` | 1 |
+| `communication-stack` |  | 0 |
+| `communication-router` | `communication-stack` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
@@ -65,6 +68,13 @@ Depois da publicação deste repositório, execute no Claude Code:
 ```text
 /plugin marketplace add JaimeJunr/claude-code-communication-skills
 /plugin install communication-stack@communication-stack
+```
+
+Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus. Todos
+os plugins de skill abaixo são opcionais; instale só os que quiser:
+
+```text
+/plugin install communication-router@communication-stack
 /plugin install caveman@communication-stack
 /plugin install i-have-adhd@communication-stack
 /plugin install humanizer@communication-stack
@@ -72,10 +82,8 @@ Depois da publicação deste repositório, execute no Claude Code:
 /plugin install eli5-ste@communication-stack
 ```
 
-Os plugins são independentes. Instalar só `communication-stack` fornece o
-estilo Stack Focus. Instale os upstreams necessários ao roteador; se a fonte
-escolhida estiver indisponível, ele informa qual falta sem trocar de editor
-silenciosamente.
+Os plugins são independentes. Se o roteador precisar de um plugin que você não
+instalou, ele informa qual falta sem trocar de editor silenciosamente.
 
 Remova cópias duplicadas instaladas dos repositórios originais. Na migração,
 confira uma vez os hooks de caveman/ADHD, estilos forçados e blocos antigos de
@@ -97,12 +105,7 @@ Coloque isto em `.claude/settings.json`:
     }
   },
   "enabledPlugins": {
-    "communication-stack@communication-stack": true,
-    "caveman@communication-stack": true,
-    "i-have-adhd@communication-stack": true,
-    "humanizer@communication-stack": true,
-    "no-ai-slop@communication-stack": true,
-    "eli5-ste@communication-stack": true
+    "communication-stack@communication-stack": true
   }
 }
 ```
@@ -110,9 +113,7 @@ Coloque isto em `.claude/settings.json`:
 Ligado não significa instalado. Cada máquina precisa da própria instalação:
 
 ```bash
-for p in communication-stack caveman i-have-adhd humanizer no-ai-slop eli5-ste; do
-  claude plugin install "$p@communication-stack" --scope project
-done
+claude plugin install communication-stack@communication-stack --scope project
 claude plugin list
 ```
 
@@ -206,7 +207,7 @@ padrões, texto final uma vez e conteúdo de máquina exato. Ressalvas e contras
 informativos sobrevivem. Detect retorna evidências sem inferir autoria.
 
 Veja os dez em
-[conflicts.md](plugins/communication-stack/skills/communication-stack/references/conflicts.md)
+[conflicts.md](plugins/communication-router/skills/communication-stack/references/conflicts.md)
 e o [registro dos 44 conflitos](docs/research/DESIGN.md#complete-register-of-all-44-audited-conflicts).
 
 ## O que fica de fora e por quê
@@ -242,7 +243,7 @@ referências talk-normal, marketplace, avisos, lock e tabelas dos READMEs.
 Os demais arquivos do plugin próprio sobrevivem, incluindo o ELI5 exato.
 Os outros três estilos são mantidos à mão e revistos após atualizações.
 
-`reference_only` copia talk-normal diretamente para as referências do roteador,
+`reference_only` copia talk-normal diretamente para as referências do plugin de estilo,
 preservando os arquivos próprios e sem criar outro plugin vazio. Os prompts
 ficam junto da adaptação, dentro do pacote instalado.
 

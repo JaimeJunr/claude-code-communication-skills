@@ -6,13 +6,13 @@
     "url": "https://github.com/JaimeJunr"
   },
   "metadata": {
-    "description": "Objective, short, clear communication for Claude Code: one task recipe, one output style, explicit conflict rulings, and no runtime hooks."
+    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and no runtime hooks."
   },
   "plugins": [
     {
       "name": "communication-stack",
       "source": "./plugins/communication-stack",
-      "description": "A task router, context precedence, and one output style: Stack Focus.",
+      "description": "One output style: Stack Focus. Every skill plugin is optional.",
       "author": {
         "name": "Jaime Basso",
         "url": "https://github.com/JaimeJunr"
@@ -25,6 +25,24 @@
         "writing",
         "clarity",
         "output-styles",
+        "claude-code"
+      ]
+    },
+    {
+      "name": "communication-router",
+      "source": "./plugins/communication-router",
+      "description": "Optional task router: reply layers by reader state, editors by destination, and context precedence.",
+      "author": {
+        "name": "Jaime Basso",
+        "url": "https://github.com/JaimeJunr"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
         "claude-code",
         "skills"
       ]

@@ -6,7 +6,7 @@
       "name": "Jaime Basso",
       "url": "https://github.com/JaimeJunr"
     },
-    "description": "Objective, short, clear communication for Claude Code: one task recipe, one output style, explicit conflict rulings, and no runtime hooks.",
+    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and no runtime hooks.",
     "repository": "https://github.com/JaimeJunr/claude-code-communication-skills"
   },
   "sources": [
@@ -24,22 +24,22 @@
         },
         {
           "from": "LICENSE",
-          "to": "skills/communication-stack/references/upstream/caveman/LICENSE",
+          "to": "references/upstream/caveman/LICENSE",
           "plugin": "communication-stack"
         },
         {
           "from": "NOTICE",
-          "to": "skills/communication-stack/references/upstream/caveman/NOTICE",
+          "to": "references/upstream/caveman/NOTICE",
           "plugin": "communication-stack"
         },
         {
           "from": "LICENSE-MIT",
-          "to": "skills/communication-stack/references/upstream/caveman/LICENSE-MIT",
+          "to": "references/upstream/caveman/LICENSE-MIT",
           "plugin": "communication-stack"
         },
         {
           "from": "LICENSING.md",
-          "to": "skills/communication-stack/references/upstream/caveman/LICENSING.md",
+          "to": "references/upstream/caveman/LICENSING.md",
           "plugin": "communication-stack"
         }
       ],
@@ -149,7 +149,7 @@
         },
         {
           "from": "LICENSE",
-          "to": "skills/communication-stack/references/upstream/adhd/LICENSE",
+          "to": "references/upstream/adhd/LICENSE",
           "plugin": "communication-stack"
         }
       ],
@@ -550,15 +550,15 @@
       "license": "MIT",
       "description": "Reference prompts adapted into the Stack Focus output style.",
       "reference_only": true,
-      "license_dir": "skills/communication-stack/references/upstream/talk-normal",
+      "license_dir": "references/upstream/talk-normal",
       "copy": [
         {
           "from": "prompt.md",
-          "to": "skills/communication-stack/references/upstream/talk-normal/prompt.md"
+          "to": "references/upstream/talk-normal/prompt.md"
         },
         {
           "from": "prompt-chatgpt.md",
-          "to": "skills/communication-stack/references/upstream/talk-normal/prompt-chatgpt.md"
+          "to": "references/upstream/talk-normal/prompt-chatgpt.md"
         }
       ],
       "license_files": [
@@ -577,7 +577,12 @@
   "local_plugins": [
     {
       "plugin": "communication-stack",
-      "description": "A task router, context precedence, and one output style: Stack Focus.",
+      "description": "One output style: Stack Focus. Every skill plugin is optional.",
+      "category": "productivity"
+    },
+    {
+      "plugin": "communication-router",
+      "description": "Optional task router: reply layers by reader state, editors by destination, and context precedence.",
       "category": "productivity"
     }
   ]

@@ -147,13 +147,13 @@ class SyncTreeTest(unittest.TestCase):
                     {"id": "recipe", "repo": "owner/recipe", "ref": "main", "plugin": "recipe", "author": "Owner",
                      "license": "MIT", "license_files": ["LICENSE"], "description": "Recipe.", "category": "productivity",
                      "copy": [{"from": "SKILL.md", "to": "skills/recipe/SKILL.md"},
-                              {"from": "LICENSE", "to": "skills/communication-stack/references/upstream/recipe/LICENSE",
+                              {"from": "LICENSE", "to": "references/upstream/recipe/LICENSE",
                                "plugin": "communication-stack"}]},
                     {"id": "reference", "repo": "owner/reference", "ref": "main", "plugin": "communication-stack",
                      "author": "Reference owner", "license": "MIT", "license_files": ["LICENSE"],
-                     "reference_only": True, "license_dir": "skills/communication-stack/references/upstream/reference",
+                     "reference_only": True, "license_dir": "references/upstream/reference",
                      "description": "Reference.", "category": "productivity",
-                     "copy": [{"from": "prompt.md", "to": "skills/communication-stack/references/upstream/reference/prompt.md"}]}
+                     "copy": [{"from": "prompt.md", "to": "references/upstream/reference/prompt.md"}]}
                 ]
             }
             with patch.multiple(sync, ROOT=root, PLUGINS=plugins, STACK=stack, LOCK_PATH=root / "UPSTREAM.lock"), \
@@ -168,7 +168,7 @@ class SyncTreeTest(unittest.TestCase):
             self.assertFalse(previous.exists())
             self.assertEqual((owned / stack["sources"][1]["copy"][0]["to"]).read_text(), "Reference prompt.\n")
             self.assertEqual((owned / stack["sources"][1]["license_dir"] / "LICENSE").read_text(), "MIT reference license\n")
-            self.assertEqual((owned / "skills/communication-stack/references/upstream/recipe/LICENSE").read_text(), "MIT recipe license\n")
+            self.assertEqual((owned / "references/upstream/recipe/LICENSE").read_text(), "MIT recipe license\n")
             self.assertFalse((plugins / "recipe" / "skills/communication-stack").exists())
             market = json.loads((root / ".claude-plugin" / "marketplace.json").read_text())
             self.assertEqual([entry["name"] for entry in market["plugins"]], ["communication-stack", "recipe"])
