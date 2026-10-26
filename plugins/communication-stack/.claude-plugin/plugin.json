@@ -1,6 +1,6 @@
 {
   "name": "communication-stack",
-  "description": "A task router, context precedence, and one output style: Stack Focus.",
+  "description": "One output style: Stack Focus. No skills; the skill plugins are optional.",
   "author": {
     "name": "Jaime Basso",
     "url": "https://github.com/JaimeJunr"
@@ -13,7 +13,6 @@
     "writing",
     "clarity",
     "output-styles",
-    "claude-code",
-    "skills"
+    "claude-code"
   ]
 }

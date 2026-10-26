@@ -15,7 +15,7 @@ token_budget = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(token_budget)
 
 STYLE_FILES = {"focus.md"}
-PLUGIN_NAMES = {"communication-stack", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste"}
+PLUGIN_NAMES = {"communication-stack", "communication-router", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste"}
 
 
 def styles():
@@ -54,7 +54,7 @@ class StackContractTest(unittest.TestCase):
     def test_no_plugin_ships_hooks(self):
         plugins = sorted(path for path in (ROOT / "plugins").glob("*") if path.is_dir())
         self.assertEqual({path.name for path in plugins}, PLUGIN_NAMES,
-                         f"scanned {len(plugins)} plugin directories; expected 6")
+                         f"scanned {len(plugins)} plugin directories; expected 7")
         for plugin in plugins:
             with self.subTest(plugin=plugin.name):
                 hooks = [path for path in plugin.rglob("*") if path.is_dir() and path.name == "hooks"]
@@ -84,15 +84,17 @@ class StackContractTest(unittest.TestCase):
                     self.assertGreater(path.stat().st_size, 0)
 
     def test_hand_written_plugin_token_budget(self):
-        plugin = ROOT / "plugins" / "communication-stack"
+        plugin = ROOT / "plugins" / "communication-router"
         router = plugin / "skills" / "communication-stack" / "SKILL.md"
         self.assertTrue(router.is_file(), "scanned 0 routers; expected communication-stack/SKILL.md")
         self.assertGreater(router.stat().st_size, 0)
         candidates = token_budget.budgeted_files(plugin)
-        self.assertEqual(len(candidates), 2, f"scanned {len(candidates)} budgeted files; expected router + 1 style")
+        self.assertEqual(len(candidates), 1, f"scanned {len(candidates)} budgeted files; expected the router")
+        style_plugin = ROOT / "plugins" / "communication-stack"
+        self.assertEqual(len(token_budget.budgeted_files(style_plugin)), 1, "expected 1 style and no skills")
         encoding = tiktoken.get_encoding("o200k_base")
         self.assertEqual(token_budget.over_budget(
-            [plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
+            [plugin, style_plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
 
     def test_no_skill_disables_model_invocation(self):
         candidates = sorted((ROOT / "plugins").rglob("SKILL.md"))
@@ -111,7 +113,7 @@ class StackContractTest(unittest.TestCase):
         self.assertEqual(violations, [], f"scanned {len(candidates)} patches; violations: {violations}")
 
     def test_router_invokes_namespaced_skills_without_install_path_discovery(self):
-        router = ROOT / "plugins/communication-stack/skills/communication-stack/SKILL.md"
+        router = ROOT / "plugins/communication-router/skills/communication-stack/SKILL.md"
         self.assertTrue(router.is_file(), "scanned 0 routers; expected 1")
         text = router.read_text()
         forbidden = ("installed_plugins.json", "installPath", "claude plugin list")
@@ -161,7 +163,7 @@ if __name__ == "__main__":
 
 
 class StateRoutingAndFocusRulesTest(unittest.TestCase):
-    ROUTER = ROOT / "plugins" / "communication-stack" / "skills" / "communication-stack" / "SKILL.md"
+    ROUTER = ROOT / "plugins" / "communication-router" / "skills" / "communication-stack" / "SKILL.md"
     FOCUS = ROOT / "plugins" / "communication-stack" / "output-styles" / "focus.md"
 
     def router_parts(self):

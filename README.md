@@ -41,14 +41,17 @@ per-upstream plugin layout of the sibling frontend marketplace.
   MIT license are reference-only copies inside the owned plugin. No installer
   or talk-normal skill is registered.
 
-The owned **communication-stack** plugin contains the router, precedence rules,
-conflict rulings, and one output style, Stack Focus. Stack Focus is the user's
+The owned **communication-stack** plugin contains only the output style, Stack Focus
+(plus the upstream license texts it adapts). The owned, optional
+**communication-router** plugin holds the router, precedence rules, and conflict
+rulings. Stack Focus is the user's
 own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
 
 <!-- SKILLS:START -->
 | Plugin | Skills | Count |
 |---|---|---|
-| `communication-stack` | `communication-stack` | 1 |
+| `communication-stack` |  | 0 |
+| `communication-router` | `communication-stack` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
@@ -64,6 +67,13 @@ Once this repository is published, run in Claude Code:
 ```text
 /plugin marketplace add JaimeJunr/claude-code-communication-skills
 /plugin install communication-stack@communication-stack
+```
+
+That is the only required install: it provides the Stack Focus style. Every
+skill plugin below is optional; add only the ones you want:
+
+```text
+/plugin install communication-router@communication-stack
 /plugin install caveman@communication-stack
 /plugin install i-have-adhd@communication-stack
 /plugin install humanizer@communication-stack
@@ -71,9 +81,8 @@ Once this repository is published, run in Claude Code:
 /plugin install eli5-ste@communication-stack
 ```
 
-Each plugin is independent. Installing only `communication-stack` provides the
-Stack Focus style. Install the upstream plugins needed by the router; if its chosen
-source is unavailable, the router names it instead of silently switching editors.
+Each plugin is independent. If the router needs a plugin you did not install,
+it names it instead of silently switching editors.
 
 If you already installed an original upstream plugin, remove the duplicate copy.
 Check separately installed caveman/ADHD hooks, forced output styles, and old
@@ -95,22 +104,17 @@ Put this in `.claude/settings.json`:
     }
   },
   "enabledPlugins": {
-    "communication-stack@communication-stack": true,
-    "caveman@communication-stack": true,
-    "i-have-adhd@communication-stack": true,
-    "humanizer@communication-stack": true,
-    "no-ai-slop@communication-stack": true,
-    "eli5-ste@communication-stack": true
+    "communication-stack@communication-stack": true
   }
 }
 ```
 
-Enabled is not installed. Each machine needs its own installation:
+Enabled is not installed. Each machine needs its own installation. Optional skill
+plugins are added the same way, one `claude plugin install <name>@communication-stack`
+each:
 
 ```bash
-for p in communication-stack caveman i-have-adhd humanizer no-ai-slop eli5-ste; do
-  claude plugin install "$p@communication-stack" --scope project
-done
+claude plugin install communication-stack@communication-stack --scope project
 claude plugin list
 ```
 
@@ -204,7 +208,7 @@ voice and intentional asides; contextual pattern tests; final text once unless
 notes are requested; and exact machine payload. Meaningful caveats and contrasts
 survive. Detect mode returns findings without guessing authorship.
 
-See [conflicts.md](plugins/communication-stack/skills/communication-stack/references/conflicts.md)
+See [conflicts.md](plugins/communication-router/skills/communication-stack/references/conflicts.md)
 for all ten, and [DESIGN.md section C](docs/research/DESIGN.md#complete-register-of-all-44-audited-conflicts)
 for the full 44-conflict register.
 
@@ -239,7 +243,7 @@ and inventory tables. Other files in `communication-stack` are owned and survive
 sync, including the exact ELI5 style. The three adapted styles are maintained by
 hand and reviewed against their sources after updates.
 
-The small `reference_only` option copies talk-normal directly into the router's
+The small `reference_only` option copies talk-normal directly into the style plugin's
 references. It preserves owned files and creates no extra marketplace entry.
 Keeping source prompts with their adapter makes the installed plugin
 self-contained and avoids an empty talk-normal plugin.

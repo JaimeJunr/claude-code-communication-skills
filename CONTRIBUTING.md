@@ -9,7 +9,7 @@
    named `<owner>_<repo>`. Local mode reads HEAD, makes no fetches, and fails
    if a clone is missing.
 3. Update the routing table in
-   `plugins/communication-stack/skills/communication-stack/SKILL.md`.
+   `plugins/communication-router/skills/communication-stack/SKILL.md`.
 4. Add a conflict ruling when required and consult the full register in
    [DESIGN.md](docs/research/DESIGN.md).
 5. Review changed licenses/notices, source helper files, and the three owned
@@ -49,7 +49,7 @@ divergent fork, reconsider inclusion.
 
 ## Change the router or output styles
 
-`plugins/communication-stack/` is hand-written except the explicitly managed
+`plugins/communication-stack/` (the style) and `plugins/communication-router/` are hand-written except the explicitly managed
 upstream reference directories. The router chooses one task recipe and holds
 the chat/prose/machine precedence ladder. All six upstream leaf skills remain
 model-invocable. Their narrow descriptions allow loading only on explicit

@@ -207,7 +207,7 @@ def sync(src_dir: Path | None) -> None:
                 target_plugin = item.get("plugin", src["plugin"])
                 copy_staging = staging
                 if target_plugin != src["plugin"]:
-                    reference_root = Path("skills") / target_plugin / "references" / "upstream" / src["id"]
+                    reference_root = Path("references") / "upstream" / src["id"]
                     if target_plugin not in {p["plugin"] for p in STACK["local_plugins"]} or not Path(item["to"]).is_relative_to(reference_root):
                         sys.exit(f"{src['id']}: cross-plugin copy must stay inside an owned plugin's {reference_root}")
                     copy_staging = Path(tmp) / "shared" / target_plugin
