@@ -130,14 +130,25 @@ CLI, or set it in `~/.claude/settings.json`:
 { "outputStyle": "communication-stack:Stack Focus" }
 ```
 
-The Claude desktop app's **Output style** picker lists only built-in styles, so
-use the settings file there. Verified on Claude Code 2.1.294.
+The Claude desktop app's **Output style** picker also lists it as
+`communication-stack:Stack Focus`, once the plugin is installed and the app has
+restarted. The style is read when a session starts, so open a new session after
+any update.
 
 - **Stack Focus**: the only style shipped, built from ideas of Concise, ELI5,
-  ADHD, Caveman Lite and Clear. Plain words with project terms explained once,
-  answer first, a three-part work report (what I did / did it work / what to do
-  now), every relevant option with a pick, links instead of bare ids, a closing
-  line that stands alone, and visuals only when they do what text cannot.
+  ADHD, Caveman Lite and Clear. What it does:
+  - Answer first; plain words, with project-specific names explained once.
+  - Never a bare PR, ticket or e-mail id: a clickable link with a human label.
+  - A three-part work report (what I did / did it work / what to do now), one
+    line per item. If the user must act, that comes right after the verdict.
+  - Lists of at most 5 items; each pending item names who unblocks it.
+  - A long answer closes with one line that repeats the verdict and the next
+    action, so it can be read first. It is the only repeat allowed.
+  - Every relevant option with a pick, all decisions in the same shape.
+  - Visuals on its own, never offered: an interactive widget when explaining
+    how something works with two or more quantities that change a result, one
+    button per option for decisions, flows and A/B layouts. Never a visual that
+    only repeats the text.
 
 Stack Focus keeps `keep-coding-instructions: true` and `force-for-plugin: false`.
 Enabling the plugin respects the existing selection. Styles use the default
@@ -239,9 +250,11 @@ for the full 44-conflict register.
 [stack.json](stack.json) allowlists every source at `ref: main`, copy path,
 license file, and reviewed patch. [scripts/sync.py](scripts/sync.py) regenerates
 the five upstream plugins, talk-normal references, marketplace, notices, lock,
-and inventory tables. Other files in `communication-stack` are owned and survive
-sync, including the exact ELI5 style. The three adapted styles are maintained by
-hand and reviewed against their sources after updates.
+and inventory tables. Other files in `communication-stack` and
+`communication-router` are owned and survive sync, including the Stack Focus
+style. Stack Focus is maintained by hand; its attributions to caveman,
+i-have-adhd and talk-normal point at `focus.md` and are reviewed against those
+sources after updates.
 
 The small `reference_only` option copies talk-normal directly into the style plugin's
 references. It preserves owned files and creates no extra marketplace entry.
@@ -303,7 +316,7 @@ No token-savings claim follows from fewer output words alone.
 
 ## Contributing and licenses
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Original router, owned ELI5 style,
+See [CONTRIBUTING.md](CONTRIBUTING.md). Original router, owned Stack Focus style,
 scripts, and docs are MIT, copyright Jaime Basso. Upstream recipes, reference
 prompts, and adapted styles retain their own grants. Sources, preserved notices,
 and every modification are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
