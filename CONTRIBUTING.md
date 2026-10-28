@@ -12,8 +12,8 @@
    `plugins/communication-router/skills/communication-stack/SKILL.md`.
 4. Add a conflict ruling when required and consult the full register in
    [DESIGN.md](docs/research/DESIGN.md).
-5. Review changed licenses/notices, source helper files, and the three owned
-   adapters. Run the behavioral evaluation TODO before releasing an update.
+5. Review changed licenses/notices, source helper files, and the owned
+   Stack Focus style. Run the behavioral evaluation TODO before releasing an update.
 
 Never edit a generated upstream plugin by hand; sync overwrites it. Put reviewed
 changes in `stack.json` `patches` with a `why`, reviewed `upstream_commit`,
@@ -40,7 +40,7 @@ talk-normal stays inside the plugin using it, without registering an installer.
 
 A copy entry may set `plugin` to an owned plugin for a reference-only destination
 under `skills/<plugin>/references/upstream/<source-id>/`. Caveman and ADHD use
-this for adapter license/notice copies so the four-style plugin can be installed
+this for adapter license/notice copies so the style plugin can be installed
 independently. These files are also generated; keep them byte-identical to source.
 
 A source belongs here when it is maintained, permissively licensed, adds a
@@ -59,11 +59,10 @@ The router invokes exactly one chosen namespaced skill through the Skill tool.
 Never invoke more than one editor per task. If its plugin is not installed,
 report that and give `/plugin install <name>@communication-stack`.
 
-Keep exactly four optional styles. Every style needs `name`, `description`,
-`keep-coding-instructions: true`, and `force-for-plugin: false`. Preserve the
-ELI5 style exactly as fixed in DESIGN.md section B. Other adapters carry a short
-provenance comment and preserve their upstream grants. Do not add hooks or
-modify user settings during sync.
+Keep exactly one output style, Stack Focus. It needs `name`, `description`,
+`keep-coding-instructions: true`, and `force-for-plugin: false`, carries a short
+provenance comment, and preserves the upstream grants listed in `stack.json`
+adaptations. Do not add hooks or modify user settings during sync.
 
 `scripts/token_budget.py` uses tiktoken `o200k_base`: 8,000 tokens per local
 SKILL.md, 20,000 per agent if any are added, and 2,000 per output style.

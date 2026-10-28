@@ -129,15 +129,24 @@ defina em `~/.claude/settings.json`:
 { "outputStyle": "communication-stack:Stack Focus" }
 ```
 
-O menu **Estilo de saída** do app desktop do Claude lista só os estilos nativos;
-nele, use o arquivo de settings. Conferido no Claude Code 2.1.294.
+O menu **Estilo de saída** do app desktop do Claude também lista
+`communication-stack:Stack Focus`, depois que o plugin está instalado e o app foi
+reiniciado. O estilo é lido quando a sessão começa, então abra uma sessão nova
+depois de qualquer atualização.
 
 - **Stack Focus**: o único estilo entregue, feito de ideias do Concise, ELI5,
-  ADHD, Caveman Lite e Clear. Palavras simples com termos do projeto explicados
-  na primeira vez, resposta primeiro, relatório em três partes (o que fiz /
-  funcionou? / o que fazer agora), todas as opções relevantes com uma escolha,
-  links no lugar de ids soltos, uma última linha que se sustenta sozinha e
-  visual só quando faz o que o texto não faz.
+  ADHD, Caveman Lite e Clear. O que ele faz:
+  - Resposta primeiro; palavras simples, com nomes do projeto explicados uma vez.
+  - Nunca um id solto de PR, ticket ou e-mail: link clicável com rótulo humano.
+  - Relatório em três partes (o que fiz / funcionou? / o que fazer agora), uma
+    linha por item. Se o usuário precisa agir, isso vem logo depois do veredito.
+  - Listas de no máximo 5 itens; cada pendência diz quem destrava.
+  - Resposta longa fecha com uma linha que repete o veredito e a próxima ação,
+    para poder ser lida primeiro. É a única repetição permitida.
+  - Todas as opções relevantes com uma escolha, todas as decisões no mesmo formato.
+  - Visual por conta própria, sem oferecer: widget interativo ao explicar como
+    algo funciona com duas ou mais grandezas que mudam um resultado, um botão por
+    opção em decisões, fluxos e layouts A/B. Nunca um visual que só repete o texto.
 
 O Stack Focus mantém `keep-coding-instructions: true` e `force-for-plugin: false`.
 Ativar o plugin respeita o estilo já selecionado. O manifesto usa a descoberta
@@ -240,8 +249,10 @@ e o [registro dos 44 conflitos](docs/research/DESIGN.md#complete-register-of-all
 [stack.json](stack.json) lista seis fontes em `ref: main`, caminhos, licenças
 e patches. [scripts/sync.py](scripts/sync.py) gera os cinco plugins upstream,
 referências talk-normal, marketplace, avisos, lock e tabelas dos READMEs.
-Os demais arquivos do plugin próprio sobrevivem, incluindo o ELI5 exato.
-Os outros três estilos são mantidos à mão e revistos após atualizações.
+Os demais arquivos de `communication-stack` e `communication-router` sobrevivem,
+incluindo o estilo Stack Focus. Ele é mantido à mão; as atribuições a caveman,
+i-have-adhd e talk-normal apontam para o `focus.md` e são revistas após
+atualizações.
 
 `reference_only` copia talk-normal diretamente para as referências do plugin de estilo,
 preservando os arquivos próprios e sem criar outro plugin vazio. Os prompts
@@ -302,7 +313,7 @@ saída não provam economia total de tokens.
 
 ## Contribuir e licenças
 
-Veja [CONTRIBUTING.md](CONTRIBUTING.md). O roteador original, o ELI5 próprio,
+Veja [CONTRIBUTING.md](CONTRIBUTING.md). O roteador original, o estilo Stack Focus próprio,
 scripts e documentação são MIT, copyright Jaime Basso. Receitas, referências
 e estilos adaptados mantêm suas licenças upstream. Fontes, avisos preservados
 e alterações estão em [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
