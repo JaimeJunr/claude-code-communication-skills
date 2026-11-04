@@ -147,6 +147,12 @@ depois de qualquer atualização.
   - Visual por conta própria, sem oferecer: widget interativo ao explicar como
     algo funciona com duas ou mais grandezas que mudam um resultado, um botão por
     opção em decisões, fluxos e layouts A/B. Nunca um visual que só repete o texto.
+    Checa se cabe um visual antes de toda resposta longa, também para linhas do
+    tempo, janelas de deploy, comparação de 3+ opções e mapas de dependência.
+  - Agendamento por conta própria: quando o trabalho deixa algo para depois
+    (um horário, janela de deploy, CI ou resposta), cria sozinho o lembrete que
+    só avisa, e propõe em uma linha o que roda comando ou mexe em produção, com
+    o quê, quando e os limites.
 
 O Stack Focus mantém `keep-coding-instructions: true` e `force-for-plugin: false`.
 Ativar o plugin respeita o estilo já selecionado. O manifesto usa a descoberta
