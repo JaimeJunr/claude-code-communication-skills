@@ -148,7 +148,12 @@ any update.
   - Visuals on its own, never offered: an interactive widget when explaining
     how something works with two or more quantities that change a result, one
     button per option for decisions, flows and A/B layouts. Never a visual that
-    only repeats the text.
+    only repeats the text. It checks for a visual before every long answer, also
+    for timelines, deploy windows, 3+ option comparisons and dependency maps.
+  - Scheduling on its own: when work leaves something for later (after a time,
+    a deploy window, CI or a reply), it creates a notify-only reminder itself,
+    and proposes anything that runs commands or touches production in one line
+    with what, when and its limits.
 
 Stack Focus keeps `keep-coding-instructions: true` and `force-for-plugin: false`.
 Enabling the plugin respects the existing selection. Styles use the default
