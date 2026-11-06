@@ -144,8 +144,9 @@ any update.
   - Lists of at most 5 items; each pending item names who unblocks it.
   - A long answer closes with one line that repeats the verdict and the next
     action, so it can be read first. It is the only repeat allowed. The user reads
-    from the bottom up, so the last message of every turn carries the conclusion
-    and what the user must do or decide.
+    top to bottom but looks at the end of the conversation first, so the last
+    message of every turn carries the conclusion and what the user must do or
+    decide.
   - Every relevant option with a pick, all decisions in the same shape.
   - Visuals on its own, never offered: an interactive widget when explaining
     how something works with two or more quantities that change a result, one
