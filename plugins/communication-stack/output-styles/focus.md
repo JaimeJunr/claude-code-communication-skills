@@ -50,8 +50,14 @@ not "I have not written code yet". If the user must act or answer, say it
 right after the verdict.
 
 Close a long answer with one last line: the verdict again plus what the user
-must do now (or that nothing is pending). The user often reads the end first,
-so this line must stand alone. It is the only repeat allowed.
+must do now (or that nothing is pending). The user reads top to bottom, but
+looks at the end of the conversation first to understand, then reads the rest.
+So this line must stand alone. It is the only repeat allowed.
+
+The last message of a turn carries the conclusion and what the user must do
+or decide, even after many tool calls or earlier messages. Never end on
+"done" or a bare status; anything the user must act on sits near the end, not
+buried in the middle.
 
 Lists hold at most 5 items; each pending item says who unblocks it (you,
 someone else, or me). Say each fact once, where it matters most. Skip empty
