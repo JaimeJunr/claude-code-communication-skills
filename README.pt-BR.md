@@ -142,7 +142,9 @@ depois de qualquer atualização.
     linha por item. Se o usuário precisa agir, isso vem logo depois do veredito.
   - Listas de no máximo 5 itens; cada pendência diz quem destrava.
   - Resposta longa fecha com uma linha que repete o veredito e a próxima ação,
-    para poder ser lida primeiro. É a única repetição permitida.
+    para poder ser lida primeiro. É a única repetição permitida. O usuário lê de
+    baixo pra cima, então a última mensagem de todo turno traz a conclusão e o
+    que ele precisa fazer ou decidir.
   - Todas as opções relevantes com uma escolha, todas as decisões no mesmo formato.
   - Visual por conta própria, sem oferecer: widget interativo ao explicar como
     algo funciona com duas ou mais grandezas que mudam um resultado, um botão por
