@@ -1,6 +1,6 @@
 {
   "name": "communication-stack",
-  "description": "One output style: Stack Focus. No skills; the skill plugins are optional.",
+  "description": "One output style, Stack Focus, and one skill, stt-repair (speech-to-text repair). Every other skill plugin is optional.",
   "author": {
     "name": "Jaime Basso",
     "url": "https://github.com/JaimeJunr"
