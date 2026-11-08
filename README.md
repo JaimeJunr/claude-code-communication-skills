@@ -41,10 +41,8 @@ per-upstream plugin layout of the sibling frontend marketplace.
   MIT license are reference-only copies inside the owned plugin. No installer
   or talk-normal skill is registered.
 
-The owned **communication-stack** plugin contains the output style, Stack Focus
-(plus the upstream license texts it adapts) and one always-installed skill,
-`stt-repair`, which repairs speech-to-text (dictation) errors from a glossary
-and asks when a name is ambiguous. The owned, optional
+The owned **communication-stack** plugin contains only the output style, Stack Focus
+(plus the upstream license texts it adapts). The owned, optional
 **communication-router** plugin holds the router, precedence rules, and conflict
 rulings. Stack Focus is the user's
 own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
@@ -52,14 +50,14 @@ own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
 <!-- SKILLS:START -->
 | Plugin | Skills | Count |
 |---|---|---|
-| `communication-stack` | `stt-repair` | 1 |
+| `communication-stack` |  | 0 |
 | `communication-router` | `communication-stack` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
 | `no-ai-slop` | `no-ai-slop` | 1 |
 | `eli5-ste` | `eli5`, `ste` | 2 |
-| **Total** | | **8** |
+| **Total** | | **7** |
 <!-- SKILLS:END -->
 
 ## Install

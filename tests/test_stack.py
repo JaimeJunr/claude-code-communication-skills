@@ -91,14 +91,14 @@ class StackContractTest(unittest.TestCase):
         candidates = token_budget.budgeted_files(plugin)
         self.assertEqual(len(candidates), 1, f"scanned {len(candidates)} budgeted files; expected the router")
         style_plugin = ROOT / "plugins" / "communication-stack"
-        self.assertEqual(len(token_budget.budgeted_files(style_plugin)), 2, "expected 1 style and the stt-repair skill")
+        self.assertEqual(len(token_budget.budgeted_files(style_plugin)), 1, "expected 1 style and no skills")
         encoding = tiktoken.get_encoding("o200k_base")
         self.assertEqual(token_budget.over_budget(
             [plugin, style_plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
 
     def test_no_skill_disables_model_invocation(self):
         candidates = sorted((ROOT / "plugins").rglob("SKILL.md"))
-        self.assertEqual(len(candidates), 8, f"scanned {len(candidates)} skills; expected 8")
+        self.assertEqual(len(candidates), 7, f"scanned {len(candidates)} skills; expected 7")
         violations = [path.relative_to(ROOT).as_posix() for path in candidates
                       if "disable-model-invocation" in path.read_text()]
         self.assertEqual(violations, [], f"scanned {len(candidates)} skills; violations: {violations}")
@@ -126,8 +126,7 @@ class StackContractTest(unittest.TestCase):
 
     def test_leaf_descriptions_require_explicit_request_or_router_selection(self):
         candidates = sorted((ROOT / "plugins").glob("*/skills/*/SKILL.md"))
-        # stt-repair is the one skill that is always installed and model-invoked; it is exempt here.
-        leaves = [path for path in candidates if path.parent.name not in {"communication-stack", "stt-repair"}]
+        leaves = [path for path in candidates if path.parent.name != "communication-stack"]
         self.assertEqual(len(leaves), 6, f"scanned {len(leaves)} leaf descriptions; expected 6")
         for path in leaves:
             with self.subTest(file=str(path.relative_to(ROOT))):
