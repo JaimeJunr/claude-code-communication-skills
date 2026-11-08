@@ -243,3 +243,11 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
                      "one short sentence"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
+
+    def test_focus_style_records_deferred_work_in_a_tracker(self):
+        text = " ".join(self.FOCUS.read_text().split())
+        for rule in ("Deferred work:", "same turn", "tracker the project uses",
+                     "ready-to-create title and body",
+                     "pending creation in the closing line"):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, text)

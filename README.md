@@ -322,6 +322,11 @@ Implement [DESIGN.md section E](docs/research/DESIGN.md#e-biggest-risk-and-cheap
 These are small-suite acceptance targets, not measured general success rates.
 No token-savings claim follows from fewer output words alone.
 
+Per-behavior goals, benchmark cases for the newer rules (visuals, scheduling,
+deferred work recorded in a tracker) and the improvement loop live in
+[docs/GOALS.md](docs/GOALS.md). `python scripts/metrics.py` measures word counts,
+visuals, schedules and recorded deferrals from your own local transcripts.
+
 ## Contributing and licenses
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Original router, owned Stack Focus style,
