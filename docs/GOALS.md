@@ -35,8 +35,8 @@ weeks, not one number.
 | G3 | Builds a visual on its own when the visual-check cases apply, and never offers it | >= 80% when it applies, 0 offers | 0.8 visuals per 100 turns (proxy) |
 | G4 | Does not build a visual when it only restates the text | 0 decorative visuals | not run |
 | G5 | Schedules later work on its own (reminder) or proposes it with task and time (runs commands) | >= 80% when it applies | 0.4 schedules per 100 turns (proxy) |
-| G6 | Deferred work gets a tracker record with a link in the same turn, never a bare "later" | >= 90% when work is set aside | 5% of deferral phrases had a record (proxy; rule added after) |
-| G7 | Fewer chat words than Default, with no required content lost | yes | median 98 words in W45, down from 160 in W42 |
+| G6 | Deferred work gets a tracker record with a link in the same turn, never a bare "later" | >= 90% when work is set aside | 6% of deferral phrases had a record (proxy; rule added after) |
+| G7 | Fewer chat words than Default, with no required content lost | yes | median 99 words in W45, down from 151 in W42 |
 
 ## Benchmark cases for the newer rules
 
@@ -73,10 +73,10 @@ section "Evaluation TODO". Each case lists the expected behavior.
 
 | Date | Scope | Cases | G1 | G3 (Focus vs other) | G4 | G5 (Focus vs other) | G6 (Focus vs other) | G7 |
 |------|-------|-------|----|----|----|----|----|----|
-| 2026-11-08 (metrics.py) | all transcripts, 21,301 turns | n/a | n/a | 0.8 vs 0.2 per 100 | n/a | 0.4 vs 0.9 per 100 | 5% vs 2% | median 117 vs 103 words overall; 98 in W45 |
+| 2026-11-08 (metrics.py) | all transcripts, 21,307 turns | n/a | n/a | 0.8 vs 0.2 per 100 | n/a | 0.5 vs 0.8 per 100 | 6% vs 3% | median 111 vs 106 words overall; 99 in W45 |
 
 Reading of the first run: over the whole history Stack Focus is not shorter
-than the other sessions (117 vs 103 median words), but the weekly trend is
-clearly down (160 in W42 to 98 in W45) and visuals rose from 0 to about 1 per
-100 turns. Parked work was almost never recorded (5%); the new deferred-work
+than the other sessions (111 vs 106 median words), but the weekly trend is
+clearly down (151 in W42 to 99 in W45) and visuals rose from 0 to about 1 per
+100 turns. Parked work was rarely recorded (6%); the new deferred-work
 rule targets exactly that, so the next run should show it rise.

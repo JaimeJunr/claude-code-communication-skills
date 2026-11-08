@@ -4,6 +4,7 @@
 """
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -29,8 +30,8 @@ def tool_result() -> str:
     return dump({"type": "user", "message": {"role": "user", "content": [block]}})
 
 
-def reply(*blocks: dict, sidechain: bool = False) -> str:
-    return dump({"type": "assistant", "isSidechain": sidechain, "timestamp": STAMP,
+def reply(*blocks: dict, sidechain: bool = False, stamp: str = STAMP) -> str:
+    return dump({"type": "assistant", "isSidechain": sidechain, "timestamp": stamp,
                        "message": {"role": "assistant", "content": list(blocks)}})
 
 
@@ -64,15 +65,31 @@ class AnalyzeSessionTest(unittest.TestCase):
         self.assertEqual(metrics.analyze_session(lines)["turns"][0]["words"], 2)
 
     def test_style_comes_from_the_attachment_and_defaults_to_none(self) -> None:
-        self.assertEqual(metrics.analyze_session([prompt(), reply(text("a"))])["style"], "none")
+        self.assertEqual(metrics.analyze_session([prompt(), reply(text("a"))])["turns"][0]["style"], "none")
         lines = [style(metrics.FOCUS_STYLE), prompt(), reply(text("a"))]
-        self.assertEqual(metrics.analyze_session(lines)["style"], metrics.FOCUS_STYLE)
+        self.assertEqual(metrics.analyze_session(lines)["turns"][0]["style"], metrics.FOCUS_STYLE)
 
     def test_style_attachment_without_a_style_is_ignored(self) -> None:
         empty = dump({"type": "attachment", "attachment": {
             "type": "output_style_instructions", "style": None}})
         lines = [style(metrics.FOCUS_STYLE), empty, prompt(), reply(text("a"))]
-        self.assertEqual(metrics.analyze_session(lines)["style"], metrics.FOCUS_STYLE)
+        self.assertEqual(metrics.analyze_session(lines)["turns"][0]["style"], metrics.FOCUS_STYLE)
+
+    def test_each_turn_keeps_the_style_active_when_it_happened(self) -> None:
+        lines = [prompt(), reply(text("a")), style(metrics.FOCUS_STYLE), prompt(), reply(text("b"))]
+        turns = metrics.analyze_session(lines)["turns"]
+        self.assertEqual([t["style"] for t in turns], ["none", metrics.FOCUS_STYLE])
+
+    def test_each_turn_keeps_its_own_week(self) -> None:
+        lines = [prompt(), reply(text("a")), prompt(), reply(text("b"), stamp="2026-11-15T10:00:00.000Z")]
+        turns = metrics.analyze_session(lines)["turns"]
+        self.assertEqual([t["week"] for t in turns], ["2026-W45", "2026-W46"])
+
+    def test_all_text_blocks_of_the_final_message_are_counted(self) -> None:
+        lines = [prompt(), reply(text("We will fix this later."), text("Tests passed."))]
+        turn = metrics.analyze_session(lines)["turns"][0]
+        self.assertEqual(turn["words"], 7)
+        self.assertTrue(turn["deferred"])
 
     def test_visual_and_schedule_tools_are_flagged(self) -> None:
         lines = [prompt(), reply(tool("mcp__visualize__show_widget"), tool("CronCreate"),
@@ -92,7 +109,7 @@ class AnalyzeSessionTest(unittest.TestCase):
         self.assertEqual(metrics.analyze_session([prompt(), reply(tool("Read"))])["turns"], [])
 
     def test_week_label_comes_from_the_first_assistant_timestamp(self) -> None:
-        self.assertEqual(metrics.analyze_session([prompt(), reply(text("a"))])["week"], "2026-W45")
+        self.assertEqual(metrics.analyze_session([prompt(), reply(text("a"))])["turns"][0]["week"], "2026-W45")
 
 
 class SummarizeTest(unittest.TestCase):
@@ -115,12 +132,24 @@ class SummarizeTest(unittest.TestCase):
 
 class RenderTest(unittest.TestCase):
     def test_groups_by_style_and_hides_small_groups(self) -> None:
-        turn = dict(words=5, widget=False, schedule=False, deferred=False, record=False)
-        sessions = [{"style": metrics.FOCUS_STYLE, "week": "2026-W45", "turns": [turn] * 3},
-                    {"style": "none", "week": "2026-W30", "turns": [turn]}]
-        table = metrics.render(sessions, "style", min_turns=2)
+        turn = dict(words=5, widget=False, schedule=False, deferred=False, record=False,
+                    week="2026-W45")
+        turns = [dict(turn, style=metrics.FOCUS_STYLE)] * 3 + [dict(turn, style="none")]
+        table = metrics.render(turns, "style", min_turns=2)
         self.assertIn("| Stack Focus | 3 |", table)
         self.assertNotIn("other styles", table)
+
+
+class CollectTest(unittest.TestCase):
+    def test_since_filters_turns_not_whole_sessions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "project"
+            folder.mkdir()
+            lines = [prompt(), reply(text("old")), prompt(),
+                     reply(text("new"), stamp="2026-11-15T10:00:00.000Z")]
+            (folder / "s.jsonl").write_text("\n".join(lines))
+            turns = metrics.collect(Path(tmp), since="2026-W46")
+        self.assertEqual([t["words"] for t in turns], [1])
 
 
 if __name__ == "__main__":

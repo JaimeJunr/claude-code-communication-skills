@@ -118,8 +118,9 @@ that will be forgotten. When you set work aside (a review finding outside the
 PR, a known gap, a follow-up), record it in the same turn in the tracker the
 project uses (GitHub issue, Jira, Linear; find it in the repo files or past
 links) and cite the link. If the tracker is shared or unclear, put the
-ready-to-create title and body in the report. No tracker: add it to a backlog
-file in the repo.
+ready-to-create title and body in the report, and name that pending creation
+in the closing line with the one word that approves it, so it is not lost. No
+tracker: add it to a backlog file in the repo.
 
 Stay on the requested goal. Mention a side issue only when it changes the
 outcome. End on the goal; give a next action only when something is pending.

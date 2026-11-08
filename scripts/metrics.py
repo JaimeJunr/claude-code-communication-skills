@@ -54,16 +54,28 @@ def tool_flags(block: dict[str, Any]) -> dict[str, bool]:
 
 
 def new_turn() -> dict[str, Any]:
-    return {"text": "", "widget": False, "schedule": False, "record": False}
+    return {"text": "", "style": None, "week": "",
+            "widget": False, "schedule": False, "record": False}
 
 
-def absorb_assistant(turn: dict[str, Any], entry: dict[str, Any]) -> None:
-    for block in entry["message"]["content"]:
-        if block.get("type") == "text" and block.get("text", "").strip():
-            turn["text"] = block["text"]
-        elif block.get("type") == "tool_use":
+def absorb_assistant(turn: dict[str, Any], entry: dict[str, Any], style: str) -> None:
+    """Fold one assistant message into the turn.
+
+    Style and week are fixed by the turn's first assistant message. Text blocks
+    of one message are joined; a later message replaces an earlier one, which
+    drops progress lines and keeps the final message.
+    """
+    blocks = entry["message"]["content"]
+    texts = [b["text"] for b in blocks if b.get("type") == "text" and b.get("text", "").strip()]
+    if texts:
+        turn["text"] = "\n".join(texts)
+    for block in blocks:
+        if block.get("type") == "tool_use":
             for key, hit in tool_flags(block).items():
                 turn[key] = turn[key] or hit
+    if turn["style"] is None:
+        turn["style"] = style
+        turn["week"] = iso_week(entry.get("timestamp", ""))
 
 
 def finish_turn(turn: dict[str, Any]) -> dict[str, Any] | None:
@@ -71,6 +83,8 @@ def finish_turn(turn: dict[str, Any]) -> dict[str, Any] | None:
     if not turn["text"]:
         return None
     return {
+        "style": turn["style"],
+        "week": turn["week"],
         "words": len(turn["text"].split()),
         "widget": turn["widget"],
         "schedule": turn["schedule"],
@@ -91,22 +105,21 @@ def iter_entries(lines: Iterable[str]) -> Iterable[dict[str, Any]]:
 
 
 def analyze_session(lines: Iterable[str]) -> dict[str, Any]:
-    """Return {"style", "week", "turns"} for one transcript."""
-    style, week, turns, turn = "none", "", [], None
+    """Return {"turns"} for one transcript; each turn carries its own style and week."""
+    style, turns, turn = "none", [], None
     for entry in iter_entries(lines):
         kind = entry.get("type")
         if kind == "attachment" and entry["attachment"].get("type") == "output_style_instructions":
             style = (entry["attachment"].get("style") or {}).get("name") or style
         elif kind == "assistant" and not entry.get("isSidechain") and turn is not None:
-            absorb_assistant(turn, entry)
-            week = week or iso_week(entry.get("timestamp", ""))
+            absorb_assistant(turn, entry, style)
         elif is_real_prompt(entry):
             done = finish_turn(turn) if turn else None
             turns.extend([done] if done else [])
             turn = new_turn()
     done = finish_turn(turn) if turn else None
     turns.extend([done] if done else [])
-    return {"style": style, "week": week, "turns": turns}
+    return {"turns": turns}
 
 
 def iso_week(timestamp: str) -> str:
@@ -133,25 +146,24 @@ def summarize(turns: list[dict[str, Any]]) -> dict[str, float]:
     }
 
 
-def group_key(session: dict[str, Any], by: str) -> str:
-    focus = "Stack Focus" if session["style"] == FOCUS_STYLE else "other styles"
-    return focus if by == "style" else f"{focus} {session['week']}"
+def group_key(turn: dict[str, Any], by: str) -> str:
+    focus = "Stack Focus" if turn["style"] == FOCUS_STYLE else "other styles"
+    return focus if by == "style" else f"{focus} {turn['week']}"
 
 
 def collect(projects: Path, since: str) -> list[dict[str, Any]]:
-    sessions = []
+    """All turns from every transcript whose own week is at or after `since`."""
+    turns: list[dict[str, Any]] = []
     for path in projects.glob("*/*.jsonl"):
         with path.open(errors="ignore") as handle:
-            session = analyze_session(handle)
-        if session["turns"] and session["week"] >= since:
-            sessions.append(session)
-    return sessions
+            turns.extend(t for t in analyze_session(handle)["turns"] if t["week"] >= since)
+    return turns
 
 
-def render(sessions: list[dict[str, Any]], by: str, min_turns: int) -> str:
+def render(turns: list[dict[str, Any]], by: str, min_turns: int) -> str:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for session in sessions:
-        groups[group_key(session, by)].extend(session["turns"])
+    for turn in turns:
+        groups[group_key(turn, by)].append(turn)
     header = ("| Group | Turns | Median words | P90 words | Visuals /100 | "
               "Schedules /100 | Deferral phrase % | Deferrals recorded % |\n"
               "|---|---|---|---|---|---|---|---|")
