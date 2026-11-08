@@ -13,7 +13,8 @@
 4. Add a conflict ruling when required and consult the full register in
    [DESIGN.md](docs/research/DESIGN.md).
 5. Review changed licenses/notices, source helper files, and the owned
-   Stack Focus style. Run the behavioral evaluation TODO before releasing an update.
+   Stack Focus style. Run the behavioral evaluation TODO before releasing an update, and update
+   the scoreboard in [docs/GOALS.md](docs/GOALS.md).
 
 Never edit a generated upstream plugin by hand; sync overwrites it. Put reviewed
 changes in `stack.json` `patches` with a `why`, reviewed `upstream_commit`,
