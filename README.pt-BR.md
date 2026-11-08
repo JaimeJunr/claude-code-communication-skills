@@ -42,8 +42,10 @@ vizinho: um plugin por upstream, mais o plugin de integração.
   MIT ficam como referências no plugin próprio. Nenhum instalador ou skill
   talk-normal é registrado.
 
-O plugin **communication-stack** contém só o estilo de saída, o Stack Focus,
-escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta). O
+O plugin **communication-stack** contém o estilo de saída, o Stack Focus,
+escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta), e
+uma skill sempre instalada, a `stt-repair`, que corrige erros de fala para texto
+(ditado) a partir de um glossário e pergunta quando um nome fica ambíguo. O
 plugin opcional **communication-router** guarda o roteador, a precedência e os
 conflitos. É diferente da
 receita `eli5-ste:eli5` de Rahul.
@@ -51,14 +53,14 @@ receita `eli5-ste:eli5` de Rahul.
 <!-- SKILLS:START -->
 | Plugin | Skills | Quantidade |
 |---|---|---|
-| `communication-stack` |  | 0 |
+| `communication-stack` | `stt-repair` | 1 |
 | `communication-router` | `communication-stack` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
 | `no-ai-slop` | `no-ai-slop` | 1 |
 | `eli5-ste` | `eli5`, `ste` | 2 |
-| **Total** | | **7** |
+| **Total** | | **8** |
 <!-- SKILLS:END -->
 
 ## Instalar
