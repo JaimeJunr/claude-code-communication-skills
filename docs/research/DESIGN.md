@@ -162,7 +162,7 @@ Do not ship:
 
 There is no need to re-inject a selected output style at SessionStart or on every prompt. No hook is needed to install, select, or reinforce these four profiles.
 
-Exception added 2026-11-12: `communication-stack` ships two context hooks that never mention style. `inject-datetime.sh` (UserPromptSubmit) adds the local time; `inject-environment.sh` (SessionStart, and UserPromptSubmit at most every 5 minutes per session) adds repo, branch, uncommitted file count, and Linux machine load. They give the model facts it cannot see. The rule above targets style re-injection, and `tests/test_stack.py` still rejects any other hook.
+Exception added 2026-11-12: `communication-stack` ships two context hooks that never mention style. `inject-datetime.sh` (UserPromptSubmit) adds the local time, plus the gap since the previous message in the same session when it is 1 hour or more; `inject-environment.sh` (SessionStart, and UserPromptSubmit at most every 5 minutes per session) adds repo, branch, uncommitted file count, and Linux machine load. They give the model facts it cannot see. The rule above targets style re-injection, and `tests/test_stack.py` still rejects any other hook.
 
 The plugin cannot cancel another plugin's hook injections or old AGENTS.md blocks. Document a one-time migration check for separately installed caveman/ADHD hooks, forced styles, and persisted talk-normal blocks. Report findings through an explicitly invoked diagnostic command if such a command is added later; do not silently modify other installations or add startup chatter.
 
