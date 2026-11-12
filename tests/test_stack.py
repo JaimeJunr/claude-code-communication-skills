@@ -19,7 +19,7 @@ token_budget = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(token_budget)
 
 STYLE_FILES = {"focus.md"}
-PLUGIN_NAMES = {"communication-stack", "communication-router", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste"}
+PLUGIN_NAMES = {"communication-stack", "communication-router", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste", "stt-repair"}
 
 
 def styles():
@@ -58,7 +58,7 @@ class StackContractTest(unittest.TestCase):
     def test_no_plugin_ships_hooks(self):
         plugins = sorted(path for path in (ROOT / "plugins").glob("*") if path.is_dir())
         self.assertEqual({path.name for path in plugins}, PLUGIN_NAMES,
-                         f"scanned {len(plugins)} plugin directories; expected 7")
+                         f"scanned {len(plugins)} plugin directories; expected 8")
         # Hooks de estilo dos upstreams (caveman, ADHD...) reinjetariam o output style; só o
         # communication-stack pode ter hook, e só o de data/hora (testado abaixo).
         for plugin in plugins:
@@ -126,10 +126,12 @@ class StackContractTest(unittest.TestCase):
         candidates = token_budget.budgeted_files(plugin)
         self.assertEqual(len(candidates), 1, f"scanned {len(candidates)} budgeted files; expected the router")
         style_plugin = ROOT / "plugins" / "communication-stack"
-        self.assertEqual(len(token_budget.budgeted_files(style_plugin)), 2, "expected 1 style and the stt-repair skill")
+        self.assertEqual(len(token_budget.budgeted_files(style_plugin)), 1, "expected only the Stack Focus style")
+        stt_plugin = ROOT / "plugins" / "stt-repair"
+        self.assertEqual(len(token_budget.budgeted_files(stt_plugin)), 1, "expected the stt-repair skill")
         encoding = tiktoken.get_encoding("o200k_base")
         self.assertEqual(token_budget.over_budget(
-            [plugin, style_plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
+            [plugin, style_plugin, stt_plugin], lambda text: len(encoding.encode(text)), token_budget.LIMITS), [])
 
     def test_no_skill_disables_model_invocation(self):
         candidates = sorted((ROOT / "plugins").rglob("SKILL.md"))
@@ -161,7 +163,7 @@ class StackContractTest(unittest.TestCase):
 
     def test_leaf_descriptions_require_explicit_request_or_router_selection(self):
         candidates = sorted((ROOT / "plugins").glob("*/skills/*/SKILL.md"))
-        # stt-repair is the one skill that is always installed and model-invoked; it is exempt here.
+        # stt-repair is model-invoked on dictation, not picked by the router; it is exempt here.
         leaves = [path for path in candidates if path.parent.name not in {"communication-stack", "stt-repair"}]
         self.assertEqual(len(leaves), 6, f"scanned {len(leaves)} leaf descriptions; expected 6")
         for path in leaves:

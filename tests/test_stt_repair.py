@@ -1,4 +1,4 @@
-"""Contract for the always-installed stt-repair skill (speech-to-text repair)."""
+"""Contract for the optional stt-repair plugin (speech-to-text repair)."""
 import json
 import unittest
 from pathlib import Path
@@ -6,7 +6,8 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL_DIR = ROOT / "plugins" / "communication-stack" / "skills" / "stt-repair"
+PLUGIN_DIR = ROOT / "plugins" / "stt-repair"
+SKILL_DIR = PLUGIN_DIR / "skills" / "stt-repair"
 
 
 def skill_text() -> str:
@@ -14,7 +15,7 @@ def skill_text() -> str:
 
 
 class SttRepairSkillTest(unittest.TestCase):
-    def test_skill_lives_in_the_required_plugin_and_the_model_may_invoke_it(self) -> None:
+    def test_skill_lives_in_its_own_plugin_and_the_model_may_invoke_it(self) -> None:
         raw = (SKILL_DIR / "SKILL.md").read_text()
         metadata = yaml.safe_load(raw.split("---\n", 2)[1])
         self.assertEqual(metadata["name"], "stt-repair")
@@ -50,14 +51,24 @@ class SttRepairSkillTest(unittest.TestCase):
                 self.assertIn(arxiv_id, research)
         self.assertIn("proceedings.neurips.cc", research)
 
-    def test_manifests_say_the_required_plugin_carries_this_skill(self) -> None:
-        manifest = json.loads((ROOT / "plugins/communication-stack/.claude-plugin/plugin.json").read_text())
-        self.assertIn("stt-repair", manifest["description"])
+    def test_skill_is_an_optional_plugin_outside_the_core(self) -> None:
+        core = ROOT / "plugins" / "communication-stack"
+        self.assertFalse((core / "skills").exists(), "the core plugin must ship no skill")
+        core_manifest = json.loads((core / ".claude-plugin" / "plugin.json").read_text())
+        self.assertNotIn("stt-repair", core_manifest["description"])
+        manifest = json.loads((PLUGIN_DIR / ".claude-plugin" / "plugin.json").read_text())
+        self.assertEqual(manifest["name"], "stt-repair")
+        self.assertIn("Optional", manifest["description"])
+        self.assertTrue((PLUGIN_DIR / "LICENSE").is_file())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text())
-        entry = next(p for p in market["plugins"] if p["name"] == "communication-stack")
-        self.assertIn("stt-repair", entry["description"])
-        self.assertIn("| `communication-stack` | `stt-repair` | 1 |", (ROOT / "README.md").read_text())
-
+        entries = {p["name"]: p for p in market["plugins"]}
+        self.assertNotIn("stt-repair", entries["communication-stack"]["description"])
+        self.assertIn("Optional", entries["stt-repair"]["description"])
+        for readme in ("README.md", "README.pt-BR.md"):
+            with self.subTest(readme=readme):
+                text = (ROOT / readme).read_text()
+                self.assertIn("| `stt-repair` | `stt-repair` | 1 |", text)
+                self.assertIn("/plugin install stt-repair@communication-stack", text)
 
 if __name__ == "__main__":
     unittest.main()

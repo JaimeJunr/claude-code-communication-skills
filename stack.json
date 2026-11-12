@@ -577,12 +577,17 @@
   "local_plugins": [
     {
       "plugin": "communication-stack",
-      "description": "One output style, Stack Focus; one skill, stt-repair (speech-to-text repair); and two context hooks (current time, repo and machine). Every other skill plugin is optional.",
+      "description": "One output style, Stack Focus, and two context hooks (current time, repo and machine). Every other plugin is optional.",
       "category": "productivity"
     },
     {
       "plugin": "communication-router",
       "description": "Optional task router: reply layers by reader state, editors by destination, and context precedence.",
+      "category": "productivity"
+    },
+    {
+      "plugin": "stt-repair",
+      "description": "Optional speech-to-text repair: fixes dictated names and acronyms from a glossary and asks when one is ambiguous.",
       "category": "productivity"
     }
   ]
