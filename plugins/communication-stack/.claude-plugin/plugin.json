@@ -1,6 +1,6 @@
 {
   "name": "communication-stack",
-  "description": "One output style, Stack Focus; one skill, stt-repair (speech-to-text repair); and two context hooks (current time, repo and machine). Every other skill plugin is optional.",
+  "description": "One output style, Stack Focus, and two context hooks (current time, repo and machine). Every other plugin is optional.",
   "author": {
     "name": "Jaime Basso",
     "url": "https://github.com/JaimeJunr"

@@ -7,6 +7,20 @@ técnico exato e rigor de engenharia.
 
 [English](README.md)
 
+## O que você recebe
+
+O principal deste projeto é um plugin, o `communication-stack`, com duas partes:
+
+- **O estilo de saída Stack Focus**: toda resposta começa pelo veredito, usa
+  palavras simples e termina com o que você precisa fazer agora.
+- **Dois hooks de contexto**: a hora atual em cada prompt, e o repo, a branch e
+  a carga da máquina no início da sessão.
+
+Só isso já basta. Todos os outros plugins daqui são **opcionais**: cada um muda
+ou melhora a comunicação ou a escrita do Claude Code numa tarefa específica
+(uma passada de brevidade, uma explicação em linguagem simples, a edição de um
+rascunho). Instale só os que quiser.
+
 ## Por que existe
 
 Uma receita de brevidade pode prejudicar a gramática; uma simplificação pode
@@ -45,9 +59,7 @@ vizinho: um plugin por upstream, mais o plugin de integração.
 
 O plugin **communication-stack** contém o estilo de saída, o Stack Focus,
 escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta), e
-uma skill sempre instalada, a `stt-repair`, que corrige erros de fala para texto
-(ditado) a partir de um glossário e pergunta quando um nome fica ambíguo. Ele
-também traz dois hooks de contexto: `inject-datetime.sh` põe a hora local em
+dois hooks de contexto: `inject-datetime.sh` põe a hora local em
 cada prompt (`Now: Thu 2026-11-12 13:04 -0300`); depois de uma pausa de 1 hora
 ou mais na mesma sessão, acrescenta o intervalo (`| 12h since the previous
 message`), para o modelo não tratar a mensagem do dia seguinte como continuação
@@ -56,15 +68,18 @@ repo, branch, número de arquivos não commitados e carga da máquina (CPU, RAM,
 swap, pressão de memória, temperatura) no início da sessão e no máximo a cada 5
 minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O
 modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
-O plugin opcional **communication-router** guarda o roteador, a precedência e os
+O plugin opcional **stt-repair** corrige erros de fala para texto (ditado) a
+partir de um glossário e pergunta quando um nome fica ambíguo. O plugin opcional
+**communication-router** guarda o roteador, a precedência e os
 conflitos. É diferente da
 receita `eli5-ste:eli5` de Rahul.
 
 <!-- SKILLS:START -->
 | Plugin | Skills | Quantidade |
 |---|---|---|
-| `communication-stack` | `stt-repair` | 1 |
+| `communication-stack` |  | 0 |
 | `communication-router` | `communication-stack` | 1 |
+| `stt-repair` | `stt-repair` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
@@ -82,11 +97,13 @@ Depois da publicação deste repositório, execute no Claude Code:
 /plugin install communication-stack@communication-stack
 ```
 
-Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus. Todos
-os plugins de skill abaixo são opcionais; instale só os que quiser:
+Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus e os
+dois hooks de contexto. Todos os plugins abaixo são opcionais; cada um muda ou
+melhora a comunicação ou a escrita do Claude Code. Instale só os que quiser:
 
 ```text
 /plugin install communication-router@communication-stack
+/plugin install stt-repair@communication-stack
 /plugin install caveman@communication-stack
 /plugin install i-have-adhd@communication-stack
 /plugin install humanizer@communication-stack

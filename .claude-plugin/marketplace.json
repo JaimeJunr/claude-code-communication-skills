@@ -12,7 +12,7 @@
     {
       "name": "communication-stack",
       "source": "./plugins/communication-stack",
-      "description": "One output style, Stack Focus; one skill, stt-repair (speech-to-text repair); and two context hooks (current time, repo and machine). Every other skill plugin is optional.",
+      "description": "One output style, Stack Focus, and two context hooks (current time, repo and machine). Every other plugin is optional.",
       "author": {
         "name": "Jaime Basso",
         "url": "https://github.com/JaimeJunr"
@@ -43,6 +43,25 @@
         "communication",
         "writing",
         "clarity",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "stt-repair",
+      "source": "./plugins/stt-repair",
+      "description": "Optional speech-to-text repair: fixes dictated names and acronyms from a glossary and asks when one is ambiguous.",
+      "author": {
+        "name": "Jaime Basso",
+        "url": "https://github.com/JaimeJunr"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+      "keywords": [
+        "communication",
+        "speech-to-text",
+        "dictation",
         "claude-code",
         "skills"
       ]

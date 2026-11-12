@@ -7,6 +7,20 @@ payload, and engineering rigor.
 
 [Português](README.pt-BR.md)
 
+## What you get
+
+The core of this project is one plugin, `communication-stack`, with two parts:
+
+- **The Stack Focus output style**: every reply opens with the verdict, uses
+  plain words, and ends with what you must do now.
+- **Two context hooks**: the current time on every prompt, and the repo, branch
+  and machine load at session start.
+
+That is all you need. Every other plugin here is **optional**: each one changes
+or improves how Claude Code communicates or writes for a specific task (a
+brevity pass, plain-language explanations, editing a draft). Install only the
+ones you want.
+
 ## Why this exists
 
 A brevity recipe can drop grammar; a simplifier can lose caveats; an editor can
@@ -44,9 +58,7 @@ per-upstream plugin layout of the sibling frontend marketplace.
   or talk-normal skill is registered.
 
 The owned **communication-stack** plugin contains the output style, Stack Focus
-(plus the upstream license texts it adapts) and one always-installed skill,
-`stt-repair`, which repairs speech-to-text (dictation) errors from a glossary
-and asks when a name is ambiguous. It also ships two context hooks:
+(plus the upstream license texts it adapts) and two context hooks:
 `inject-datetime.sh` adds the current local time to every prompt
 (`Now: Thu 2026-11-12 13:04 -0300`); after a pause of 1 hour or more in the
 same session it appends the gap (`| 12h since the previous message`), so the
@@ -55,7 +67,9 @@ branch, uncommitted file count, and machine load (CPU, RAM, swap, memory
 pressure, temperature) at session start and at most every 5 minutes per
 session. The machine part reads `/proc`, so it appears on Linux only. The model
 cannot see the clock or the machine on its own; these hooks never touch the
-style. The owned, optional
+style. The owned, optional **stt-repair** plugin
+repairs speech-to-text (dictation) errors from a glossary and asks when a name
+is ambiguous. The owned, optional
 **communication-router** plugin holds the router, precedence rules, and conflict
 rulings. Stack Focus is the user's
 own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
@@ -63,8 +77,9 @@ own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
 <!-- SKILLS:START -->
 | Plugin | Skills | Count |
 |---|---|---|
-| `communication-stack` | `stt-repair` | 1 |
+| `communication-stack` |  | 0 |
 | `communication-router` | `communication-stack` | 1 |
+| `stt-repair` | `stt-repair` | 1 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
@@ -82,11 +97,13 @@ Once this repository is published, run in Claude Code:
 /plugin install communication-stack@communication-stack
 ```
 
-That is the only required install: it provides the Stack Focus style. Every
-skill plugin below is optional; add only the ones you want:
+That is the only required install: it provides the Stack Focus style and the
+two context hooks. Every plugin below is optional; each one changes or improves
+how Claude Code communicates or writes. Add only the ones you want:
 
 ```text
 /plugin install communication-router@communication-stack
+/plugin install stt-repair@communication-stack
 /plugin install caveman@communication-stack
 /plugin install i-have-adhd@communication-stack
 /plugin install humanizer@communication-stack
