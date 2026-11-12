@@ -1,6 +1,8 @@
 """Repository contracts for the communication stack, including non-empty scans."""
 import importlib.util
 import json
+import os
+import subprocess
 import hashlib
 import re
 import unittest
@@ -55,13 +57,44 @@ class StackContractTest(unittest.TestCase):
         plugins = sorted(path for path in (ROOT / "plugins").glob("*") if path.is_dir())
         self.assertEqual({path.name for path in plugins}, PLUGIN_NAMES,
                          f"scanned {len(plugins)} plugin directories; expected 7")
+        # Hooks de estilo dos upstreams (caveman, ADHD...) reinjetariam o output style; só o
+        # communication-stack pode ter hook, e só o de data/hora (testado abaixo).
         for plugin in plugins:
             with self.subTest(plugin=plugin.name):
                 hooks = [path for path in plugin.rglob("*") if path.is_dir() and path.name == "hooks"]
-                self.assertEqual(hooks, [])
+                expected = [plugin / "hooks"] if plugin.name == "communication-stack" else []
+                self.assertEqual(hooks, expected)
                 manifest = plugin / ".claude-plugin" / "plugin.json"
                 self.assertTrue(manifest.is_file(), f"{manifest}: missing manifest")
                 self.assertNotIn("hooks", json.loads(manifest.read_text()))
+
+    def test_stack_ships_only_the_context_hooks(self):
+        hooks_dir = ROOT / "plugins" / "communication-stack" / "hooks"
+        self.assertEqual(sorted(path.name for path in hooks_dir.iterdir()),
+                         ["hooks.json", "inject-datetime.sh", "inject-environment.sh"])
+        config = json.loads((hooks_dir / "hooks.json").read_text())["hooks"]
+        commands = {event: [hook["command"] for entry in entries for hook in entry["hooks"]]
+                    for event, entries in config.items()}
+        datetime_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/inject-datetime.sh"'
+        environment_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/inject-environment.sh"'
+        self.assertEqual(commands, {"SessionStart": [environment_cmd],
+                                    "UserPromptSubmit": [datetime_cmd, environment_cmd]})
+
+    def test_datetime_hook_injects_only_the_current_time(self):
+        script = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
+        env = {"PATH": os.environ["PATH"], "TZ": "America/Sao_Paulo"}
+        result = subprocess.run(["bash", str(script)], input="{}", capture_output=True, text=True, env=env, check=True)
+        output = json.loads(result.stdout)["hookSpecificOutput"]
+        self.assertEqual(output["hookEventName"], "UserPromptSubmit")
+        self.assertRegex(output["additionalContext"],
+                         r"^Now: (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{4}-\d{2}-\d{2} \d{2}:\d{2} -0300$")
+
+    def test_datetime_hook_ignores_the_user_locale(self):
+        script = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
+        env = {"PATH": os.environ["PATH"], "TZ": "UTC", "LC_ALL": "pt_BR.UTF-8", "LANG": "pt_BR.UTF-8"}
+        result = subprocess.run(["bash", str(script)], input="{}", capture_output=True, text=True, env=env, check=True)
+        context = json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"]
+        self.assertRegex(context, r"^Now: (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .* \+0000$")
 
     def test_caveman_contains_only_the_base_skill(self):
         plugin = ROOT / "plugins" / "caveman"
@@ -159,8 +192,6 @@ class StackContractTest(unittest.TestCase):
         self.assertGreaterEqual(checked, 11, f"scanned {checked} verbatim copies; expected at least 11")
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class StateRoutingAndFocusRulesTest(unittest.TestCase):
@@ -252,3 +283,71 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
                      "pending creation in the closing line"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
+
+
+ENVIRONMENT_HOOK = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-environment.sh"
+
+
+class EnvironmentHookTest(unittest.TestCase):
+    def run_hook(self, cwd, event, session="s1"):
+        env = {"PATH": os.environ["PATH"], "TMPDIR": str(self.tmp), "HOME": str(self.tmp)}
+        payload = json.dumps({"session_id": session, "hook_event_name": event, "cwd": str(cwd)})
+        result = subprocess.run(["bash", str(ENVIRONMENT_HOOK)], input=payload, capture_output=True,
+                                text=True, env=env, cwd=cwd, check=True)
+        if not result.stdout.strip():
+            return None
+        output = json.loads(result.stdout)["hookSpecificOutput"]
+        self.assertEqual(output["hookEventName"], event)
+        return output["additionalContext"]
+
+    def setUp(self):
+        import tempfile
+        self._dir = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._dir.name)
+        self.repo = self.tmp / "demo-repo"
+        self.repo.mkdir()
+        git = ["git", "-C", str(self.repo), "-c", "user.name=t", "-c", "user.email=t@t"]
+        subprocess.run(git + ["init", "-q", "-b", "feature-x"], check=True)
+        (self.repo / "a.txt").write_text("a")
+        subprocess.run(git + ["add", "."], check=True)
+        subprocess.run(git + ["commit", "-qm", "init"], check=True)
+        (self.repo / "b.txt").write_text("b")
+
+    def tearDown(self):
+        self._dir.cleanup()
+
+    def test_reports_repo_branch_and_changed_files_without_emoji(self):
+        context = self.run_hook(self.repo, "SessionStart")
+        self.assertIn("Repo: demo-repo | Branch: feature-x | Uncommitted files: 1", context)
+        self.assertFalse(re.search(r"[\U0001F300-\U0001FAFF\u2600-\u27BF]", context), context)
+
+    def test_outside_git_reports_machine_only(self):
+        outside = self.tmp / "plain"
+        outside.mkdir()
+        context = self.run_hook(outside, "SessionStart")
+        self.assertNotIn("Repo:", context or "")
+
+    def test_reports_machine_load_and_memory_on_linux(self):
+        if not Path("/proc/meminfo").is_file():
+            self.skipTest("machine stats read /proc (Linux only)")
+        context = self.run_hook(self.repo, "SessionStart")
+        self.assertRegex(context, r"Machine: load [\d.]+/\d+ cores \| RAM free \d+% \(\d+ GiB\)")
+        self.assertNotIn("heavy-run", context)
+        self.assertNotIn("note2", context)
+
+    def test_prompt_updates_are_throttled_per_session(self):
+        self.assertIsNotNone(self.run_hook(self.repo, "UserPromptSubmit"))
+        self.assertIsNone(self.run_hook(self.repo, "UserPromptSubmit"))
+        self.assertIsNotNone(self.run_hook(self.repo, "UserPromptSubmit", session="s2"))
+
+    def test_first_prompt_after_session_start_does_not_repeat(self):
+        self.assertIsNotNone(self.run_hook(self.repo, "SessionStart"))
+        self.assertIsNone(self.run_hook(self.repo, "UserPromptSubmit"))
+
+    def test_session_start_always_reports(self):
+        self.assertIsNotNone(self.run_hook(self.repo, "UserPromptSubmit"))
+        self.assertIsNotNone(self.run_hook(self.repo, "SessionStart"))
+
+
+if __name__ == "__main__":
+    unittest.main()

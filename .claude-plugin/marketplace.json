@@ -6,13 +6,13 @@
     "url": "https://github.com/JaimeJunr"
   },
   "metadata": {
-    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and no runtime hooks."
+    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and two context hooks (time and environment); no style re-injection."
   },
   "plugins": [
     {
       "name": "communication-stack",
       "source": "./plugins/communication-stack",
-      "description": "One output style, Stack Focus, and one skill, stt-repair (speech-to-text repair). Every other skill plugin is optional.",
+      "description": "One output style, Stack Focus; one skill, stt-repair (speech-to-text repair); and two context hooks (current time, repo and machine). Every other skill plugin is optional.",
       "author": {
         "name": "Jaime Basso",
         "url": "https://github.com/JaimeJunr"
