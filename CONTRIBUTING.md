@@ -63,7 +63,9 @@ report that and give `/plugin install <name>@communication-stack`.
 Keep exactly one output style, Stack Focus. It needs `name`, `description`,
 `keep-coding-instructions: true`, and `force-for-plugin: false`, carries a short
 provenance comment, and preserves the upstream grants listed in `stack.json`
-adaptations. Do not add hooks or modify user settings during sync.
+adaptations. Do not add hooks or modify user settings during sync. The only hooks are the
+two context hooks in `plugins/communication-stack/hooks/` (time and
+environment); `tests/test_stack.py` fails on any other hook.
 
 `scripts/token_budget.py` uses tiktoken `o200k_base`: 8,000 tokens per local
 SKILL.md, 20,000 per agent if any are added, and 2,000 per output style.

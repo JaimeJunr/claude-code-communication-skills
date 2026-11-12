@@ -12,7 +12,9 @@ payload, and engineering rigor.
 A brevity recipe can drop grammar; a simplifier can lose caveats; an editor can
 overwrite personal voice. Stacking them also adds competing instructions and
 input cost. This stack combines reply layers with a fixed precedence, distinguishes chat from
-publishable prose and machine text, and keeps every runtime hook out.
+publishable prose and machine text, and keeps out every hook that re-injects a
+style. The only hooks are two small context hooks: the current time and the
+working environment.
 
 The research and source evidence live in [DESIGN.md](docs/research/DESIGN.md)
 and [ANALYSIS.md](docs/research/ANALYSIS.md). This repository uses the simpler
@@ -44,7 +46,14 @@ per-upstream plugin layout of the sibling frontend marketplace.
 The owned **communication-stack** plugin contains the output style, Stack Focus
 (plus the upstream license texts it adapts) and one always-installed skill,
 `stt-repair`, which repairs speech-to-text (dictation) errors from a glossary
-and asks when a name is ambiguous. The owned, optional
+and asks when a name is ambiguous. It also ships two context hooks:
+`inject-datetime.sh` adds the current local time to every prompt
+(`Now: Thu 2026-11-12 13:04 -0300`), and `inject-environment.sh` adds the repo,
+branch, uncommitted file count, and machine load (CPU, RAM, swap, memory
+pressure, temperature) at session start and at most every 5 minutes per
+session. The machine part reads `/proc`, so it appears on Linux only. The model
+cannot see the clock or the machine on its own; these hooks never touch the
+style. The owned, optional
 **communication-router** plugin holds the router, precedence rules, and conflict
 rulings. Stack Focus is the user's
 own hand-written style. It is distinct from Rahul's `eli5-ste:eli5` recipe.
@@ -252,8 +261,10 @@ for the full 44-conflict register.
   `investigate-first`, `lean-build`, `migration`, `safe-refactor`,
   `surgical-patch`, or `verify-and-stop`. They strip grammar, switch language,
   modify memory, or add artifact/coding/delegation/Cloud policy outside this scope.
-- **All hooks, installers, and runtime machinery:** no startup injection,
+- **Upstream hooks, installers, and runtime machinery:** no style re-injection,
   always-on flags, automatic rewriting, statusline offers, or AGENTS.md edits.
+  The output style is already selected, so re-injecting it only duplicates it.
+  The two context hooks above add facts the model cannot see, not style.
 
 ## Keeping up with upstream
 

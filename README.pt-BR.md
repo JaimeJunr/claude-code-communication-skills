@@ -13,7 +13,8 @@ Uma receita de brevidade pode prejudicar a gramática; uma simplificação pode
 apagar ressalvas; um editor pode substituir a voz pessoal. Empilhar todos também
 acrescenta instruções concorrentes e custo de contexto. A stack escolhe uma
 receita por tarefa, separa conversa, prosa publicável e texto de máquina, e não
-inclui hooks.
+inclui hook que reinjete estilo. Os únicos hooks são dois hooks pequenos de
+contexto: a hora atual e o ambiente de trabalho.
 
 A pesquisa está em [DESIGN.md](docs/research/DESIGN.md) e
 [ANALYSIS.md](docs/research/ANALYSIS.md). O layout segue o marketplace frontend
@@ -45,8 +46,14 @@ vizinho: um plugin por upstream, mais o plugin de integração.
 O plugin **communication-stack** contém o estilo de saída, o Stack Focus,
 escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta), e
 uma skill sempre instalada, a `stt-repair`, que corrige erros de fala para texto
-(ditado) a partir de um glossário e pergunta quando um nome fica ambíguo. O
-plugin opcional **communication-router** guarda o roteador, a precedência e os
+(ditado) a partir de um glossário e pergunta quando um nome fica ambíguo. Ele
+também traz dois hooks de contexto: `inject-datetime.sh` põe a hora local em
+cada prompt (`Now: Thu 2026-11-12 13:04 -0300`), e `inject-environment.sh` põe
+repo, branch, número de arquivos não commitados e carga da máquina (CPU, RAM,
+swap, pressão de memória, temperatura) no início da sessão e no máximo a cada 5
+minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O
+modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
+O plugin opcional **communication-router** guarda o roteador, a precedência e os
 conflitos. É diferente da
 receita `eli5-ste:eli5` de Rahul.
 
@@ -250,9 +257,11 @@ e o [registro dos 44 conflitos](docs/research/DESIGN.md#complete-register-of-all
   `migration`, `safe-refactor`, `surgical-patch` e `verify-and-stop`.
   Removem gramática, trocam idioma, alteram memória ou acrescentam políticas de
   artefatos, programação, delegação e Cloud fora deste escopo.
-- **Todos os hooks, instaladores e mecanismos de runtime:** nenhuma injeção de
-  início de sessão, flag always-on, reescrita automática, oferta de statusline
-  ou alteração de AGENTS.md.
+- **Hooks, instaladores e mecanismos de runtime dos upstreams:** nenhuma
+  reinjeção de estilo, flag always-on, reescrita automática, oferta de
+  statusline ou alteração de AGENTS.md. O estilo de saída já está selecionado,
+  então reinjetá-lo só duplica. Os dois hooks de contexto acima trazem fatos que
+  o modelo não vê, não estilo.
 
 ## Sincronização
 
