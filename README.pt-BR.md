@@ -48,7 +48,10 @@ escrito pelo usuário (mais os textos de licença dos upstreams que ele adapta),
 uma skill sempre instalada, a `stt-repair`, que corrige erros de fala para texto
 (ditado) a partir de um glossário e pergunta quando um nome fica ambíguo. Ele
 também traz dois hooks de contexto: `inject-datetime.sh` põe a hora local em
-cada prompt (`Now: Thu 2026-11-12 13:04 -0300`), e `inject-environment.sh` põe
+cada prompt (`Now: Thu 2026-11-12 13:04 -0300`); depois de uma pausa de 1 hora
+ou mais na mesma sessão, acrescenta o intervalo (`| 12h since the previous
+message`), para o modelo não tratar a mensagem do dia seguinte como continuação
+imediata. E `inject-environment.sh` põe
 repo, branch, número de arquivos não commitados e carga da máquina (CPU, RAM,
 swap, pressão de memória, temperatura) no início da sessão e no máximo a cada 5
 minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O

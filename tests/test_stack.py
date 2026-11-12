@@ -3,6 +3,8 @@ import importlib.util
 import json
 import os
 import subprocess
+import tempfile
+import time
 import hashlib
 import re
 import unittest
@@ -82,7 +84,7 @@ class StackContractTest(unittest.TestCase):
 
     def test_datetime_hook_injects_only_the_current_time(self):
         script = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
-        env = {"PATH": os.environ["PATH"], "TZ": "America/Sao_Paulo"}
+        env = {"PATH": os.environ["PATH"], "TMPDIR": self.enterContext(tempfile.TemporaryDirectory()), "TZ": "America/Sao_Paulo"}
         result = subprocess.run(["bash", str(script)], input="{}", capture_output=True, text=True, env=env, check=True)
         output = json.loads(result.stdout)["hookSpecificOutput"]
         self.assertEqual(output["hookEventName"], "UserPromptSubmit")
@@ -91,7 +93,7 @@ class StackContractTest(unittest.TestCase):
 
     def test_datetime_hook_ignores_the_user_locale(self):
         script = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
-        env = {"PATH": os.environ["PATH"], "TZ": "UTC", "LC_ALL": "pt_BR.UTF-8", "LANG": "pt_BR.UTF-8"}
+        env = {"PATH": os.environ["PATH"], "TMPDIR": self.enterContext(tempfile.TemporaryDirectory()), "TZ": "UTC", "LC_ALL": "pt_BR.UTF-8", "LANG": "pt_BR.UTF-8"}
         result = subprocess.run(["bash", str(script)], input="{}", capture_output=True, text=True, env=env, check=True)
         context = json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"]
         self.assertRegex(context, r"^Now: (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .* \+0000$")
@@ -301,7 +303,6 @@ class EnvironmentHookTest(unittest.TestCase):
         return output["additionalContext"]
 
     def setUp(self):
-        import tempfile
         self._dir = tempfile.TemporaryDirectory()
         self.tmp = Path(self._dir.name)
         self.repo = self.tmp / "demo-repo"
@@ -347,6 +348,56 @@ class EnvironmentHookTest(unittest.TestCase):
     def test_session_start_always_reports(self):
         self.assertIsNotNone(self.run_hook(self.repo, "UserPromptSubmit"))
         self.assertIsNotNone(self.run_hook(self.repo, "SessionStart"))
+
+
+DATETIME_HOOK = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
+
+
+class DatetimeGapTest(unittest.TestCase):
+    """O hook avisa quanto tempo passou desde a mensagem anterior da sessão, só acima de 1h."""
+
+    def setUp(self):
+        self.tmp = Path(self.enterContext(tempfile.TemporaryDirectory()))
+
+    def run_hook(self, session="s1"):
+        env = {"PATH": os.environ["PATH"], "TMPDIR": str(self.tmp), "TZ": "UTC"}
+        payload = json.dumps({"session_id": session, "hook_event_name": "UserPromptSubmit"})
+        result = subprocess.run(["bash", str(DATETIME_HOOK)], input=payload, capture_output=True,
+                                text=True, env=env, check=True)
+        return json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"]
+
+    def previous_message(self, seconds_ago, session="s1"):
+        stamp = self.tmp / f"communication-stack-time-{session}.stamp"
+        stamp.write_text(str(int(time.time()) - seconds_ago))
+
+    def test_first_message_has_no_gap(self):
+        self.assertNotIn("since the previous message", self.run_hook())
+
+    def test_gap_under_one_hour_is_not_reported(self):
+        self.previous_message(59 * 60)
+        self.assertNotIn("since the previous message", self.run_hook())
+
+    def test_gap_in_hours(self):
+        self.previous_message(12 * 3600 + 5 * 60)
+        self.assertTrue(self.run_hook().endswith(" | 12h since the previous message"))
+
+    def test_gap_in_days_and_hours(self):
+        self.previous_message(2 * 86400 + 3 * 3600 + 60)
+        self.assertTrue(self.run_hook().endswith(" | 2d 3h since the previous message"))
+
+    def test_each_message_resets_the_gap(self):
+        self.previous_message(5 * 3600)
+        self.assertIn("5h since", self.run_hook())
+        self.assertNotIn("since the previous message", self.run_hook())
+
+    def test_corrupt_stamp_is_treated_as_first_message(self):
+        (self.tmp / "communication-stack-time-s1.stamp").write_text("garbage")
+        self.assertNotIn("since the previous message", self.run_hook())
+
+    def test_sessions_do_not_share_the_gap(self):
+        self.previous_message(5 * 3600, session="other")
+        self.assertNotIn("since the previous message", self.run_hook(session="s1"))
+
 
 
 if __name__ == "__main__":

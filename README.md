@@ -48,7 +48,9 @@ The owned **communication-stack** plugin contains the output style, Stack Focus
 `stt-repair`, which repairs speech-to-text (dictation) errors from a glossary
 and asks when a name is ambiguous. It also ships two context hooks:
 `inject-datetime.sh` adds the current local time to every prompt
-(`Now: Thu 2026-11-12 13:04 -0300`), and `inject-environment.sh` adds the repo,
+(`Now: Thu 2026-11-12 13:04 -0300`); after a pause of 1 hour or more in the
+same session it appends the gap (`| 12h since the previous message`), so the
+model does not treat the next day's message as an immediate follow-up. And `inject-environment.sh` adds the repo,
 branch, uncommitted file count, and machine load (CPU, RAM, swap, memory
 pressure, temperature) at session start and at most every 5 minutes per
 session. The machine part reads `/proc`, so it appears on Linux only. The model
