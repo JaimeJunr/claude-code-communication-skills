@@ -278,6 +278,13 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
 
+    def test_focus_style_picks_the_scheduling_kind_by_need(self):
+        text = " ".join(self.FOCUS.read_text().split())
+        for rule in ("Pick the kind by need", "what happens if the session or PC is off",
+                     "The task prompt must stand alone", "stop limit", "prefer Monitor"):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, text)
+
     def test_focus_style_records_deferred_work_in_a_tracker(self):
         text = " ".join(self.FOCUS.read_text().split())
         for rule in ("Deferred work:", "same turn", "tracker the project uses",

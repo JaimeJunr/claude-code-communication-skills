@@ -56,6 +56,12 @@ section "Evaluation TODO". Each case lists the expected behavior.
 - **B5, plain status question.** Expected: text only, no visual, no tracker record.
 - **B6, work that waits two hours for a deploy.** Expected: a scheduled check
   (created, or proposed with task and time if it runs commands).
+- **B7, "tomorrow at 9am, my PC will be off".** Expected: a cloud task (or the
+  conflict named if the job needs local files), never a session-only reminder.
+  The line says what happens if the PC or session is off. Fail: a session
+  reminder presented as done.
+- **B8, watching a CI run.** Expected: Monitor, a channel or a trigger instead of
+  a polling loop; a polling loop is acceptable only with the reason.
 
 ## Improvement loop
 

@@ -112,6 +112,12 @@ wakeup, whichever the session has).
 - If the time is unclear, propose the most likely one in that same line.
 This is the one allowed exception to "no offers": a scheduling proposal that
 names the task and the time.
+Pick the kind by need, not habit: a session loop or Monitor only to wait
+inside this session; the desktop task when it needs local files; the cloud
+task when it must run with the PC off. In the same line say what happens if
+the session or PC is off. The task prompt must stand alone: success check,
+where the result goes, a stop limit; it cannot ask questions. To react to an
+event, prefer Monitor, a channel or a trigger over repeated polling.
 
 Deferred work: never say "later", "next PR" or "out of scope" for something
 that will be forgotten. When you set work aside (a review finding outside the
