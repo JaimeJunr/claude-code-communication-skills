@@ -430,9 +430,13 @@ def assistant_tool(name, tool_input):
         {"type": "tool_use", "id": "t1", "name": name, "input": tool_input}]}}
 
 
-def tool_result(text):
+def tool_result(text, is_error=False):
     return {"type": "user", "message": {"role": "user", "content": [
-        {"type": "tool_result", "tool_use_id": "t1", "content": text}]}}
+        {"type": "tool_result", "tool_use_id": "t1", "content": text, "is_error": is_error}]}}
+
+
+def meta_notice(text):
+    return {"type": "user", "isMeta": True, "message": {"role": "user", "content": [{"type": "text", "text": text}]}}
 
 
 # Caso real que originou o hook (Sussurro, 2026-11-20): seis achados da revisão listados numa
@@ -509,6 +513,32 @@ class DeferredWorkHookTest(unittest.TestCase):
             with self.subTest(tool=name):
                 self.assertBlocks(self.run_hook([user_prompt("go"), assistant_tool(name, {"items": []}),
                                                  tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
+
+    def test_a_failed_record_write_is_not_a_record(self):
+        # Apontado pelo Codex no PR 17: tool_use com tool_result is_error não criou nada.
+        for name, tool_input in (("Write", {"file_path": "/repo/BACKLOG.md", "content": "x"}),
+                                 ("Bash", {"command": "gh issue create --title x"})):
+            with self.subTest(tool=name):
+                self.assertBlocks(self.run_hook([user_prompt("go"), assistant_tool(name, tool_input),
+                                                 tool_result("permission denied", is_error=True),
+                                                 assistant_text("I will fix them later; the record failed.")]))
+
+    def test_blocks_deferral_written_only_in_the_pr_body(self):
+        # Apontado pelo Codex no PR 17: o caso B9 com a lista só no corpo do PR e a resposta só com o link.
+        body = "## What\nx\n\n## Fica para depois\n- testes do capture.rs"
+        for name, tool_input in (("mcp__github__create_pull_request", {"title": "x", "body": body}),
+                                 ("Bash", {"command": f"gh pr create --title x --body-file - <<'EOF'\n{body}\nEOF"})):
+            with self.subTest(tool=name):
+                self.assertBlocks(self.run_hook([user_prompt("open the PR"), assistant_tool(name, tool_input),
+                                                 tool_result("https://github.com/o/r/pull/8"),
+                                                 assistant_text("Opened https://github.com/o/r/pull/8.")]))
+
+    def test_injected_meta_entries_do_not_reset_the_turn(self):
+        # Apontado pelo Codex no PR 17: aviso injetado (isMeta) no meio do turno apagava o registro feito antes.
+        self.assertIsNone(self.run_hook([user_prompt("go"),
+                                         assistant_tool("Edit", {"file_path": "/repo/BACKLOG.md"}),
+                                         tool_result("ok"), meta_notice("<system-reminder>x</system-reminder>"),
+                                         assistant_text("Tests are left for later and recorded in BACKLOG.md.")]))
 
     def test_passes_without_deferral(self):
         self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text("Done. Tests pass.")]))

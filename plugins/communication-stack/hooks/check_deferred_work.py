@@ -35,6 +35,7 @@ RECORD_TOOL = re.compile(r"create.?(?:jira)?.?issue|issue.?create|add_list_recor
 # Ferramentas da própria sessão (lista de tarefas, plano, card de sessão): somem com a sessão.
 SESSION_TOOL = re.compile(r"^(?:TodoWrite|TaskCreate|TaskUpdate)$|^mcp__ccd_")
 BACKLOG_FILE = re.compile(r"(?:backlog|todo)[^/]*\.md$", re.IGNORECASE)
+PR_COMMAND = re.compile(r"\bgh\s+pr\s+(?:create|edit|comment)\b")
 CODE = re.compile(r"```.*?```|`[^`\n]*`", re.DOTALL)
 
 REASON = (
@@ -49,7 +50,8 @@ REASON = (
 
 
 def is_real_prompt(entry: dict[str, Any]) -> bool:
-    if entry.get("type") != "user" or entry.get("isSidechain"):
+    # isMeta: contexto injetado (aviso, system-reminder) no meio do turno, não prompt da pessoa.
+    if entry.get("type") != "user" or entry.get("isMeta") or entry.get("isSidechain"):
         return False
     content = (entry.get("message") or {}).get("content")
     if isinstance(content, str):
@@ -57,18 +59,32 @@ def is_real_prompt(entry: dict[str, Any]) -> bool:
     return isinstance(content, list) and any(block.get("type") == "text" for block in content)
 
 
-def current_turn(lines: Iterable[str]) -> list[dict[str, Any]]:
+def current_turn(lines: Iterable[str]) -> tuple[list[dict[str, Any]], dict[str, bool]]:
+    """Mensagens do assistente no turno atual e, por tool_use_id, se o resultado deu erro."""
     turn: list[dict[str, Any]] = []
+    failed: dict[str, bool] = {}
     for line in lines:
         try:
             entry = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if entry.get("isSidechain"):
+            continue
         if is_real_prompt(entry):
-            turn = []
-        elif entry.get("type") == "assistant" and not entry.get("isSidechain"):
+            turn, failed = [], {}
+        elif entry.get("type") == "assistant":
             turn.append(entry)
-    return turn
+        elif entry.get("type") == "user":
+            failed.update(tool_failures(entry))
+    return turn, failed
+
+
+def tool_failures(entry: dict[str, Any]) -> dict[str, bool]:
+    content = (entry.get("message") or {}).get("content")
+    if not isinstance(content, list):
+        return {}
+    return {block.get("tool_use_id", ""): bool(block.get("is_error"))
+            for block in content if block.get("type") == "tool_result"}
 
 
 def blocks_of(turn: list[dict[str, Any]]) -> Iterable[dict[str, Any]]:
@@ -88,32 +104,45 @@ def tool_records(block: dict[str, Any]) -> bool:
     return bool(RECORD_COMMAND.search(json.dumps(tool_input)))
 
 
-def turn_records(turn: list[dict[str, Any]], text: str) -> bool:
+def turn_records(turn: list[dict[str, Any]], failed: dict[str, bool], text: str) -> bool:
     if RECORD_LINK.search(text):
         return True
-    return any(block.get("type") == "tool_use" and tool_records(block) for block in blocks_of(turn))
+    # Só conta a chamada que voltou sem erro: escrita negada ou comando que falhou não registrou nada.
+    return any(block.get("type") == "tool_use" and failed.get(block.get("id", "")) is False
+               and tool_records(block) for block in blocks_of(turn))
 
 
-def read_turn(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str]:
+def authored_prose(block: dict[str, Any]) -> str:
+    """Texto que o agente publica por ferramenta (corpo de PR), onde o adiamento também se esconde."""
+    tool_input = block.get("input") or {}
+    parts = [str(tool_input.get(key, "")) for key in ("body", "description")]
+    command = str(tool_input.get("command", ""))
+    if PR_COMMAND.search(command):
+        parts.append(command)
+    return "\n".join(part for part in parts if part)
+
+
+def read_turn(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, bool], str]:
     # No Stop, o transcript às vezes ainda não tem a resposta final gravada (visto no /verify);
     # last_assistant_message do payload sempre tem, então entra junto.
     last = str(payload.get("last_assistant_message") or "")
     try:
         lines = Path(payload["transcript_path"]).read_text(encoding="utf-8").splitlines()
     except (KeyError, OSError, TypeError):
-        return [], last
-    turn = current_turn(lines)
-    texts = [block.get("text", "") for block in blocks_of(turn) if block.get("type") == "text"]
-    return turn, "\n".join(texts + [last])
+        return [], {}, last
+    turn, failed = current_turn(lines)
+    texts = [block.get("text", "") if block.get("type") == "text" else authored_prose(block)
+             for block in blocks_of(turn) if block.get("type") in ("text", "tool_use")]
+    return turn, failed, "\n".join(texts + [last])
 
 
 def decide(payload: dict[str, Any]) -> dict[str, str] | None:
     # stop_hook_active: o hook já barrou uma vez neste fim de turno; barrar de novo vira loop.
     if payload.get("stop_hook_active"):
         return None
-    turn, text = read_turn(payload)
+    turn, failed, text = read_turn(payload)
     found = DEFERRAL.search(CODE.sub(" ", text))
-    if not found or turn_records(turn, text):
+    if not found or turn_records(turn, failed, text):
         return None
     return {"decision": "block", "reason": REASON.format(phrase=found.group(0))}
 
