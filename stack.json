@@ -6,7 +6,7 @@
       "name": "Jaime Basso",
       "url": "https://github.com/JaimeJunr"
     },
-    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and two context hooks (time and environment); no style re-injection.",
+    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and two context hooks (time and environment) plus a deferred-work check; no style re-injection.",
     "repository": "https://github.com/JaimeJunr/claude-code-communication-skills"
   },
   "sources": [
@@ -577,7 +577,7 @@
   "local_plugins": [
     {
       "plugin": "communication-stack",
-      "description": "One output style, Stack Focus, and two context hooks (current time, repo and machine). Every other plugin is optional.",
+      "description": "One output style, Stack Focus, two context hooks (current time, repo and machine) and a deferred-work check. Every other plugin is optional.",
       "category": "productivity"
     },
     {

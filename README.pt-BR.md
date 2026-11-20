@@ -15,6 +15,9 @@ O principal deste projeto é um plugin, o `communication-stack`, com duas partes
   palavras simples e termina com o que você precisa fazer agora.
 - **Dois hooks de contexto**: a hora atual em cada prompt, e o repo, a branch e
   a carga da máquina no início da sessão.
+- **Checagem de trabalho adiado**: o turno que deixa algo para depois ("later",
+  "próximo PR", "fica para depois") sem issue, ticket ou backlog volta uma vez
+  para registrar.
 
 Só isso já basta. Todos os outros plugins daqui são **opcionais**: cada um muda
 ou melhora a comunicação ou a escrita do Claude Code numa tarefa específica
@@ -28,7 +31,8 @@ apagar ressalvas; um editor pode substituir a voz pessoal. Empilhar todos també
 acrescenta instruções concorrentes e custo de contexto. A stack escolhe uma
 receita por tarefa, separa conversa, prosa publicável e texto de máquina, e não
 inclui hook que reinjete estilo. Os únicos hooks são dois hooks pequenos de
-contexto: a hora atual e o ambiente de trabalho.
+contexto (a hora atual e o ambiente de trabalho) e uma checagem de que trabalho
+adiado ganhou registro.
 
 A pesquisa está em [DESIGN.md](docs/research/DESIGN.md) e
 [ANALYSIS.md](docs/research/ANALYSIS.md). O layout segue o marketplace frontend
@@ -68,6 +72,11 @@ repo, branch, número de arquivos não commitados e carga da máquina (CPU, RAM,
 swap, pressão de memória, temperatura) no início da sessão e no máximo a cada 5
 minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O
 modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
+Um hook `Stop`, `check-deferred-work.sh`, lê o turno atual: se ele adia
+trabalho em qualquer idioma ("later", "fora do escopo", "fica para depois") e
+não criou nem citou issue, ticket ou arquivo de backlog, barra o fim do turno
+uma vez e pede o registro. Lista na descrição do PR não conta. Precisa de
+`python3` e fica calado sem ele.
 O plugin opcional **stt-repair** corrige erros de fala para texto (ditado) a
 partir de um glossário e pergunta quando um nome fica ambíguo. O plugin opcional
 **communication-router** guarda o roteador, a precedência e os
@@ -97,8 +106,8 @@ Depois da publicação deste repositório, execute no Claude Code:
 /plugin install communication-stack@communication-stack
 ```
 
-Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus e os
-dois hooks de contexto. Todos os plugins abaixo são opcionais; cada um muda ou
+Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus, os
+dois hooks de contexto e a checagem de trabalho adiado. Todos os plugins abaixo são opcionais; cada um muda ou
 melhora a comunicação ou a escrita do Claude Code. Instale só os que quiser:
 
 ```text
@@ -281,7 +290,8 @@ e o [registro dos 44 conflitos](docs/research/DESIGN.md#complete-register-of-all
   reinjeção de estilo, flag always-on, reescrita automática, oferta de
   statusline ou alteração de AGENTS.md. O estilo de saída já está selecionado,
   então reinjetá-lo só duplica. Os dois hooks de contexto acima trazem fatos que
-  o modelo não vê, não estilo.
+  o modelo não vê, não estilo; a checagem de trabalho adiado só faz valer uma
+  regra do Stack Focus.
 
 ## Sincronização
 

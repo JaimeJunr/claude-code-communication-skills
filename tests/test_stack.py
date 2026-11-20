@@ -60,7 +60,7 @@ class StackContractTest(unittest.TestCase):
         self.assertEqual({path.name for path in plugins}, PLUGIN_NAMES,
                          f"scanned {len(plugins)} plugin directories; expected 8")
         # Hooks de estilo dos upstreams (caveman, ADHD...) reinjetariam o output style; só o
-        # communication-stack pode ter hook, e só o de data/hora (testado abaixo).
+        # communication-stack pode ter hook, e só os de contexto e o de trabalho adiado (testados abaixo).
         for plugin in plugins:
             with self.subTest(plugin=plugin.name):
                 hooks = [path for path in plugin.rglob("*") if path.is_dir() and path.name == "hooks"]
@@ -70,17 +70,20 @@ class StackContractTest(unittest.TestCase):
                 self.assertTrue(manifest.is_file(), f"{manifest}: missing manifest")
                 self.assertNotIn("hooks", json.loads(manifest.read_text()))
 
-    def test_stack_ships_only_the_context_hooks(self):
+    def test_stack_ships_only_the_context_and_deferred_work_hooks(self):
         hooks_dir = ROOT / "plugins" / "communication-stack" / "hooks"
         self.assertEqual(sorted(path.name for path in hooks_dir.iterdir()),
-                         ["hooks.json", "inject-datetime.sh", "inject-environment.sh"])
+                         ["check-deferred-work.sh", "check_deferred_work.py", "hooks.json",
+                          "inject-datetime.sh", "inject-environment.sh"])
         config = json.loads((hooks_dir / "hooks.json").read_text())["hooks"]
         commands = {event: [hook["command"] for entry in entries for hook in entry["hooks"]]
                     for event, entries in config.items()}
         datetime_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/inject-datetime.sh"'
         environment_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/inject-environment.sh"'
+        deferred_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/check-deferred-work.sh"'
         self.assertEqual(commands, {"SessionStart": [environment_cmd],
-                                    "UserPromptSubmit": [datetime_cmd, environment_cmd]})
+                                    "UserPromptSubmit": [datetime_cmd, environment_cmd],
+                                    "Stop": [deferred_cmd]})
 
     def test_datetime_hook_injects_only_the_current_time(self):
         script = ROOT / "plugins" / "communication-stack" / "hooks" / "inject-datetime.sh"
@@ -291,7 +294,9 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
         text = " ".join(self.FOCUS.read_text().split())
         for rule in ("Deferred work:", "same turn", "tracker the project uses",
                      "ready-to-create title and body",
-                     "pending creation in the closing line"):
+                     "pending creation in the closing line",
+                     "in any language", "is not a record", "PR description",
+                     "your own repo"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
 
@@ -407,6 +412,112 @@ class DatetimeGapTest(unittest.TestCase):
         self.previous_message(5 * 3600, session="other")
         self.assertNotIn("since the previous message", self.run_hook(session="s1"))
 
+
+DEFERRED_HOOK = ROOT / "plugins" / "communication-stack" / "hooks" / "check-deferred-work.sh"
+
+
+def user_prompt(text):
+    return {"type": "user", "message": {"role": "user", "content": text}}
+
+
+def assistant_text(text):
+    return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": text}]}}
+
+
+def assistant_tool(name, tool_input):
+    return {"type": "assistant", "message": {"role": "assistant", "content": [
+        {"type": "tool_use", "id": "t1", "name": name, "input": tool_input}]}}
+
+
+def tool_result(text):
+    return {"type": "user", "message": {"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": "t1", "content": text}]}}
+
+
+# Caso real que originou o hook (Sussurro, 2026-11-20): seis achados da revisão listados numa
+# seção "Fica para depois" da descrição do PR, sem issue nenhuma.
+SUSSURRO_REPORT = (
+    "I opened the PR. The review's six suggestions are listed under \"Fica para depois\", "
+    "so they don't get lost.\n\n**Fica para depois**\n- Tests for `capture.rs`\n- A `FocusGuard`")
+
+
+class DeferredWorkHookTest(unittest.TestCase):
+    """O hook Stop barra o fim do turno que adia trabalho sem deixar registro (issue, ticket, backlog)."""
+
+    def setUp(self):
+        self.tmp = Path(self.enterContext(tempfile.TemporaryDirectory()))
+
+    def run_hook(self, entries, stop_hook_active=False, **extra):
+        transcript = self.tmp / "t.jsonl"
+        transcript.write_text("".join(json.dumps(entry) + "\n" for entry in entries))
+        payload = {"session_id": "s1", "hook_event_name": "Stop", "transcript_path": str(transcript),
+                   "stop_hook_active": stop_hook_active, **extra}
+        result = subprocess.run(["bash", str(DEFERRED_HOOK)], input=json.dumps(payload),
+                                capture_output=True, text=True, env={"PATH": os.environ["PATH"]}, check=True)
+        return json.loads(result.stdout) if result.stdout.strip() else None
+
+    def assertBlocks(self, decision):
+        self.assertIsNotNone(decision)
+        self.assertEqual(decision["decision"], "block")
+        self.assertIn("not a record", decision["reason"])
+
+    def test_blocks_the_sussurro_case(self):
+        self.assertBlocks(self.run_hook([user_prompt("Open with gh"),
+                                         assistant_tool("Bash", {"command": "gh pr create --body x"}),
+                                         tool_result("https://github.com/o/r/pull/8"),
+                                         assistant_text(SUSSURRO_REPORT)]))
+
+    def test_blocks_english_deferral(self):
+        for phrase in ("We can handle these in a follow-up PR.", "That is out of scope; next PR.",
+                       "I'll fix them later.", "Deixo isso para um próximo PR.", "Fica fora do escopo."):
+            with self.subTest(phrase=phrase):
+                self.assertBlocks(self.run_hook([user_prompt("go"), assistant_text(phrase)]))
+
+    def test_passes_when_an_issue_was_created_in_the_turn(self):
+        self.assertIsNone(self.run_hook([user_prompt("go"),
+                                         assistant_tool("Bash", {"command": "gh issue create --title x"}),
+                                         tool_result("https://github.com/o/r/issues/9"),
+                                         assistant_text(SUSSURRO_REPORT)]))
+
+    def test_passes_when_the_report_links_an_issue(self):
+        text = SUSSURRO_REPORT + "\nRecorded in https://github.com/o/r/issues/9 and https://x.atlassian.net/browse/CAP-1"
+        self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text(text)]))
+
+    def test_passes_when_a_tracker_tool_or_backlog_file_was_used(self):
+        for name, tool_input in (("mcp__atlassian__createJiraIssue", {"summary": "x"}),
+                                 ("Edit", {"file_path": "/repo/BACKLOG.md", "old_string": "a", "new_string": "b"}),
+                                 ("Write", {"file_path": "/repo/docs/backlog.md", "content": "x"})):
+            with self.subTest(tool=name):
+                self.assertIsNone(self.run_hook([user_prompt("go"), assistant_tool(name, tool_input),
+                                                 tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
+
+    def test_passes_without_deferral(self):
+        self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text("Done. Tests pass.")]))
+
+    def test_ignores_deferrals_from_previous_turns(self):
+        self.assertIsNone(self.run_hook([user_prompt("a"), assistant_text("Fica para depois: X"),
+                                         user_prompt("b"), assistant_text("Done.")]))
+
+    def test_ignores_phrases_inside_code(self):
+        text = "Done.\n```\n# TODO: fix later\n```\nThe flag is `--later`."
+        self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text(text)]))
+
+    def test_does_not_block_twice(self):
+        # stop_hook_active: já barrou uma vez; barrar de novo prende o agente em loop.
+        self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text(SUSSURRO_REPORT)],
+                                        stop_hook_active=True))
+
+    def test_missing_transcript_falls_back_to_last_message(self):
+        payload = {"hook_event_name": "Stop", "transcript_path": str(self.tmp / "missing.jsonl"),
+                   "last_assistant_message": SUSSURRO_REPORT}
+        result = subprocess.run(["bash", str(DEFERRED_HOOK)], input=json.dumps(payload),
+                                capture_output=True, text=True, check=True)
+        self.assertBlocks(json.loads(result.stdout))
+
+    def test_bad_input_never_breaks_the_session(self):
+        result = subprocess.run(["bash", str(DEFERRED_HOOK)], input="not json",
+                                capture_output=True, text=True)
+        self.assertEqual((result.returncode, result.stdout), (0, ""))
 
 
 if __name__ == "__main__":

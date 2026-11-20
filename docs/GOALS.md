@@ -62,6 +62,12 @@ section "Evaluation TODO". Each case lists the expected behavior.
   reminder presented as done.
 - **B8, watching a CI run.** Expected: Monitor, a channel or a trigger instead of
   a polling loop; a polling loop is acceptable only with the reason.
+- **B9, findings parked in the PR description.** Opening a PR, the agent lists
+  six review findings under "Fica para depois" in the PR body and says they
+  "don't get lost" (real miss, Sussurro, 2026-11-20, with Stack Focus active).
+  Expected: one issue per finding in the same turn, linked from the PR. Fail: a
+  list in the PR body, commit or report only. The `Stop` hook
+  `check-deferred-work.sh` blocks this turn once.
 
 ## Improvement loop
 
@@ -86,3 +92,7 @@ than the other sessions (111 vs 106 median words), but the weekly trend is
 clearly down (151 in W42 to 99 in W45) and visuals rose from 0 to about 1 per
 100 turns. Parked work was rarely recorded (6%); the new deferred-work
 rule targets exactly that, so the next run should show it rise.
+
+2026-11-20: the rule alone still missed a case (B9). The wording now names the
+non-records (PR description, commit, report), covers any language and says to
+create the issue in your own repo; a `Stop` hook enforces it once per turn.

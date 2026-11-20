@@ -15,6 +15,9 @@ The core of this project is one plugin, `communication-stack`, with two parts:
   plain words, and ends with what you must do now.
 - **Two context hooks**: the current time on every prompt, and the repo, branch
   and machine load at session start.
+- **A deferred-work check**: a turn that sets work aside ("later", "next PR",
+  "fica para depois") without an issue, ticket or backlog entry is sent back
+  once to record it.
 
 That is all you need. Every other plugin here is **optional**: each one changes
 or improves how Claude Code communicates or writes for a specific task (a
@@ -27,8 +30,8 @@ A brevity recipe can drop grammar; a simplifier can lose caveats; an editor can
 overwrite personal voice. Stacking them also adds competing instructions and
 input cost. This stack combines reply layers with a fixed precedence, distinguishes chat from
 publishable prose and machine text, and keeps out every hook that re-injects a
-style. The only hooks are two small context hooks: the current time and the
-working environment.
+style. The only hooks are two small context hooks (the current time and the
+working environment) and one check that parked work gets a record.
 
 The research and source evidence live in [DESIGN.md](docs/research/DESIGN.md)
 and [ANALYSIS.md](docs/research/ANALYSIS.md). This repository uses the simpler
@@ -67,7 +70,11 @@ branch, uncommitted file count, and machine load (CPU, RAM, swap, memory
 pressure, temperature) at session start and at most every 5 minutes per
 session. The machine part reads `/proc`, so it appears on Linux only. The model
 cannot see the clock or the machine on its own; these hooks never touch the
-style. The owned, optional **stt-repair** plugin
+style. A `Stop` hook, `check-deferred-work.sh`, reads the current turn: if it
+sets work aside in any language ("later", "out of scope", "fica para depois")
+and created no issue, ticket or backlog file and links none, it blocks the
+stop once and asks for the record. A list in a PR description does not count.
+It needs `python3` and stays silent without it. The owned, optional **stt-repair** plugin
 repairs speech-to-text (dictation) errors from a glossary and asks when a name
 is ambiguous. The owned, optional
 **communication-router** plugin holds the router, precedence rules, and conflict
@@ -97,8 +104,8 @@ Once this repository is published, run in Claude Code:
 /plugin install communication-stack@communication-stack
 ```
 
-That is the only required install: it provides the Stack Focus style and the
-two context hooks. Every plugin below is optional; each one changes or improves
+That is the only required install: it provides the Stack Focus style, the
+two context hooks and the deferred-work check. Every plugin below is optional; each one changes or improves
 how Claude Code communicates or writes. Add only the ones you want:
 
 ```text
@@ -283,7 +290,8 @@ for the full 44-conflict register.
 - **Upstream hooks, installers, and runtime machinery:** no style re-injection,
   always-on flags, automatic rewriting, statusline offers, or AGENTS.md edits.
   The output style is already selected, so re-injecting it only duplicates it.
-  The two context hooks above add facts the model cannot see, not style.
+  The two context hooks above add facts the model cannot see, not style; the
+  deferred-work check only enforces a Stack Focus rule.
 
 ## Keeping up with upstream
 
