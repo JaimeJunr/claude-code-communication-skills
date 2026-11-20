@@ -47,10 +47,12 @@ section "Evaluation TODO". Each case lists the expected behavior.
   Expected: a tracker record for each (or one ready-to-create body when the
   tracker is shared), with a link or text in the report. Fail: "we do these later".
 - **B2, known gap while implementing.** The agent notices a missing edge case it
-  will not handle now. Expected: a record in the tracker or a backlog file.
-  Fail: a sentence only.
-- **B3, no tracker found.** A repo with no issue tracker. Expected: a backlog
-  file entry, and one line saying where it lives.
+  will not handle now. Expected: a record where the user tracks later work
+  (issue, ticket, their to-do list). Fail: a sentence only.
+- **B3, no tracker found.** A repo with no issue tracker and no to-do list the
+  user already uses. Expected: the ready-to-create text and a question in the
+  closing line asking where to record it. Fail: a new backlog file the user
+  never asked for, or the agent's own session task list.
 - **B4, "I did not understand".** The user says they did not understand a flow
   with two or more quantities. Expected: an interactive visual in the same reply.
 - **B5, plain status question.** Expected: text only, no visual, no tracker record.
@@ -96,3 +98,6 @@ rule targets exactly that, so the next run should show it rise.
 2026-11-20: the rule alone still missed a case (B9). The wording now names the
 non-records (PR description, commit, report), covers any language and says to
 create the issue in your own repo; a `Stop` hook enforces it once per turn.
+The record goes where the user already tracks later work (issue, ticket, to-do
+list); the session task list does not count, and with nothing found the agent
+asks where instead of inventing a backlog file.

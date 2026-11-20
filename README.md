@@ -16,8 +16,8 @@ The core of this project is one plugin, `communication-stack`, with two parts:
 - **Two context hooks**: the current time on every prompt, and the repo, branch
   and machine load at session start.
 - **A deferred-work check**: a turn that sets work aside ("later", "next PR",
-  "fica para depois") without an issue, ticket or backlog entry is sent back
-  once to record it.
+  "fica para depois") without a record where you track later work (GitHub
+  issue, Jira ticket, your to-do list) is sent back once to record it.
 
 That is all you need. Every other plugin here is **optional**: each one changes
 or improves how Claude Code communicates or writes for a specific task (a
@@ -72,8 +72,9 @@ session. The machine part reads `/proc`, so it appears on Linux only. The model
 cannot see the clock or the machine on its own; these hooks never touch the
 style. A `Stop` hook, `check-deferred-work.sh`, reads the current turn: if it
 sets work aside in any language ("later", "out of scope", "fica para depois")
-and created no issue, ticket or backlog file and links none, it blocks the
-stop once and asks for the record. A list in a PR description does not count.
+and created no issue, ticket or to-do item and links none, it blocks the
+stop once and asks for the record. A list in a PR description or the
+session's own task list does not count.
 It needs `python3` and stays silent without it. The owned, optional **stt-repair** plugin
 repairs speech-to-text (dictation) errors from a glossary and asks when a name
 is ambiguous. The owned, optional

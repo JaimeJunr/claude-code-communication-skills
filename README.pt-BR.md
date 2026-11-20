@@ -16,7 +16,8 @@ O principal deste projeto é um plugin, o `communication-stack`, com duas partes
 - **Dois hooks de contexto**: a hora atual em cada prompt, e o repo, a branch e
   a carga da máquina no início da sessão.
 - **Checagem de trabalho adiado**: o turno que deixa algo para depois ("later",
-  "próximo PR", "fica para depois") sem issue, ticket ou backlog volta uma vez
+  "próximo PR", "fica para depois") sem registro onde você anota trabalho
+  futuro (issue no GitHub, ticket no Jira, sua lista de to-do) volta uma vez
   para registrar.
 
 Só isso já basta. Todos os outros plugins daqui são **opcionais**: cada um muda
@@ -74,8 +75,9 @@ minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linu
 modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
 Um hook `Stop`, `check-deferred-work.sh`, lê o turno atual: se ele adia
 trabalho em qualquer idioma ("later", "fora do escopo", "fica para depois") e
-não criou nem citou issue, ticket ou arquivo de backlog, barra o fim do turno
-uma vez e pede o registro. Lista na descrição do PR não conta. Precisa de
+não criou nem citou issue, ticket ou item de to-do, barra o fim do turno
+uma vez e pede o registro. Lista na descrição do PR ou na lista de tarefas da
+própria sessão não conta. Precisa de
 `python3` e fica calado sem ele.
 O plugin opcional **stt-repair** corrige erros de fala para texto (ditado) a
 partir de um glossário e pergunta quando um nome fica ambíguo. O plugin opcional

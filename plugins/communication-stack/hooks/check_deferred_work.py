@@ -3,7 +3,9 @@
 A regra "Deferred work" do Stack Focus sozinha não bastou: só 6% dos adiamentos tinham registro
 (docs/GOALS.md, G6), e no Sussurro (2026-11-20) seis achados de revisão ficaram numa seção
 "Fica para depois" da descrição do PR. O hook lê o turno atual no transcript e, se o texto
-adia algo sem issue, ticket ou backlog no mesmo turno, devolve "block" uma única vez.
+adia algo sem registro onde o usuário anota trabalho futuro (issue, ticket, item na lista de
+to-do) no mesmo turno, devolve "block" uma única vez. A lista de tarefas da própria sessão não
+conta: some com a sessão.
 Qualquer falha de leitura sai sem bloquear: o hook nunca pode travar a sessão.
 """
 import json
@@ -24,21 +26,25 @@ DEFERRAL = re.compile(
 )
 RECORD_LINK = re.compile(
     r"github\.com/[^/\s]+/[^/\s]+/issues/\d+|gitlab\.[^\s]*/-/issues/\d+"
-    r"|atlassian\.net/browse/[A-Z][A-Z0-9]+-\d+|linear\.app/[^\s]*/issue/",
+    r"|atlassian\.net/browse/[A-Z][A-Z0-9]+-\d+|linear\.app/[^\s]*/issue/"
+    r"|todoist\.com/[^\s]*task/|trello\.com/c/|to-do\.(?:office|live)\.com/",
 )
 RECORD_COMMAND = re.compile(r"\b(?:gh|glab)\s+issue\s+create\b|\bjira\s+issue\s+create\b")
-RECORD_TOOL = re.compile(r"create.?(?:jira)?.?issue|issue.?create|add_list_record", re.IGNORECASE)
+RECORD_TOOL = re.compile(r"create.?(?:jira)?.?issue|issue.?create|add_list_record"
+                         r"|(?:add|create).?(?:task|todo|reminder|card)\b", re.IGNORECASE)
+# Ferramentas da própria sessão (lista de tarefas, plano, card de sessão): somem com a sessão.
+SESSION_TOOL = re.compile(r"^(?:TodoWrite|TaskCreate|TaskUpdate)$|^mcp__ccd_")
 BACKLOG_FILE = re.compile(r"(?:backlog|todo)[^/]*\.md$", re.IGNORECASE)
 CODE = re.compile(r"```.*?```|`[^`\n]*`", re.DOTALL)
 
 REASON = (
-    "Deferred work without a record: this turn sets work aside ({phrase!r}) but created no issue, "
-    "ticket or backlog entry. A list in a PR description, a commit, a code comment or this report "
-    "is not a record: it is gone once the PR closes. Record each item now in the project's tracker "
-    "(gh issue create, Jira, Linear; in your own repo, create it) and cite the links in the report. "
-    "If the tracker is shared or unclear, show the ready-to-create title and body and name that "
-    "pending creation in the closing line. No tracker: add it to a backlog file in the repo. If "
-    "nothing was actually set aside, finish as is."
+    "Deferred work without a record: this turn sets work aside ({phrase!r}) but recorded it "
+    "nowhere the user tracks later work. A list in a PR description, a commit, a code comment, "
+    "this report or the session task list is not a record: it is gone once the PR or session "
+    "closes. Record each item now where the user already tracks work (GitHub issue, Jira ticket, "
+    "their to-do list; in your own repo, create the issue) and cite the links in the report. If "
+    "that place is shared or unclear, show the ready-to-create title and body and ask where, in "
+    "the closing line. If nothing was actually set aside, finish as is."
 )
 
 
@@ -73,6 +79,8 @@ def blocks_of(turn: list[dict[str, Any]]) -> Iterable[dict[str, Any]]:
 def tool_records(block: dict[str, Any]) -> bool:
     name = block.get("name", "")
     tool_input = block.get("input") or {}
+    if SESSION_TOOL.search(name):
+        return False
     if RECORD_TOOL.search(name):
         return True
     if name in ("Write", "Edit", "MultiEdit") and BACKLOG_FILE.search(str(tool_input.get("file_path", ""))):

@@ -296,7 +296,8 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
                      "ready-to-create title and body",
                      "pending creation in the closing line",
                      "in any language", "is not a record", "PR description",
-                     "your own repo"):
+                     "your own repo", "to-do list", "already uses",
+                     "session task list", "ask where"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
 
@@ -442,7 +443,7 @@ SUSSURRO_REPORT = (
 
 
 class DeferredWorkHookTest(unittest.TestCase):
-    """O hook Stop barra o fim do turno que adia trabalho sem deixar registro (issue, ticket, backlog)."""
+    """O hook Stop barra o fim do turno que adia trabalho sem deixar registro (issue, ticket, to-do)."""
 
     def setUp(self):
         self.tmp = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -489,6 +490,24 @@ class DeferredWorkHookTest(unittest.TestCase):
                                  ("Write", {"file_path": "/repo/docs/backlog.md", "content": "x"})):
             with self.subTest(tool=name):
                 self.assertIsNone(self.run_hook([user_prompt("go"), assistant_tool(name, tool_input),
+                                                 tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
+
+    def test_passes_when_a_todo_app_was_used(self):
+        for name in ("mcp__todoist__add_task", "mcp__microsoft-todo__create_task", "mcp__trello__add_card"):
+            with self.subTest(tool=name):
+                self.assertIsNone(self.run_hook([user_prompt("go"), assistant_tool(name, {"content": "x"}),
+                                                 tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
+
+    def test_passes_when_the_report_links_a_todo_item(self):
+        for link in ("https://app.todoist.com/app/task/abc-123", "https://trello.com/c/AbC123/9-x"):
+            with self.subTest(link=link):
+                self.assertIsNone(self.run_hook([user_prompt("go"), assistant_text(SUSSURRO_REPORT + "\n" + link)]))
+
+    def test_the_agents_own_task_list_is_not_a_record(self):
+        # Lista de tarefas da sessão e card de sessão somem com a sessão: o usuário não vê depois.
+        for name in ("TodoWrite", "TaskCreate", "mcp__ccd_turn__update_plan", "mcp__ccd_session__start_session"):
+            with self.subTest(tool=name):
+                self.assertBlocks(self.run_hook([user_prompt("go"), assistant_tool(name, {"items": []}),
                                                  tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
 
     def test_passes_without_deferral(self):
