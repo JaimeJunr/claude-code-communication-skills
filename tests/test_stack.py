@@ -514,6 +514,13 @@ class DeferredWorkHookTest(unittest.TestCase):
                                 capture_output=True, text=True, check=True)
         self.assertBlocks(json.loads(result.stdout))
 
+    def test_reads_the_final_message_not_yet_in_the_transcript(self):
+        # Visto no /verify: no Stop, o transcript às vezes ainda não tem a resposta final gravada;
+        # o payload traz ela em last_assistant_message.
+        self.assertBlocks(self.run_hook([user_prompt("go"), assistant_tool("Write", {"file_path": "/r/hello.py"}),
+                                         tool_result("ok")],
+                                        last_assistant_message="Tests are out of scope and stay for a next PR."))
+
     def test_bad_input_never_breaks_the_session(self):
         result = subprocess.run(["bash", str(DEFERRED_HOOK)], input="not json",
                                 capture_output=True, text=True)

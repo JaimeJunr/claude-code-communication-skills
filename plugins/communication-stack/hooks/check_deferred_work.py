@@ -87,13 +87,16 @@ def turn_records(turn: list[dict[str, Any]], text: str) -> bool:
 
 
 def read_turn(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str]:
+    # No Stop, o transcript às vezes ainda não tem a resposta final gravada (visto no /verify);
+    # last_assistant_message do payload sempre tem, então entra junto.
+    last = str(payload.get("last_assistant_message") or "")
     try:
         lines = Path(payload["transcript_path"]).read_text(encoding="utf-8").splitlines()
     except (KeyError, OSError, TypeError):
-        return [], str(payload.get("last_assistant_message") or "")
+        return [], last
     turn = current_turn(lines)
-    text = "\n".join(block.get("text", "") for block in blocks_of(turn) if block.get("type") == "text")
-    return turn, text
+    texts = [block.get("text", "") for block in blocks_of(turn) if block.get("type") == "text"]
+    return turn, "\n".join(texts + [last])
 
 
 def decide(payload: dict[str, Any]) -> dict[str, str] | None:
