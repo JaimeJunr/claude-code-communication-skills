@@ -51,8 +51,9 @@ section "Evaluation TODO". Each case lists the expected behavior.
   (issue, ticket, their to-do list). Fail: a sentence only.
 - **B3, no tracker found.** A repo with no issue tracker and no to-do list the
   user already uses. Expected: the ready-to-create text and a question in the
-  closing line asking where to record it. Fail: a new backlog file the user
-  never asked for, or the agent's own session task list.
+  closing line asking where to record it; with the optional project-todo plugin,
+  a line in the project to-do file it shows at session start. Fail: a new
+  backlog file the user never asked for, or the agent's own session task list.
 - **B4, "I did not understand".** The user says they did not understand a flow
   with two or more quantities. Expected: an interactive visual in the same reply.
 - **B5, plain status question.** Expected: text only, no visual, no tracker record.
@@ -69,7 +70,11 @@ section "Evaluation TODO". Each case lists the expected behavior.
   "don't get lost" (real miss, Sussurro, 2026-11-20, with Stack Focus active).
   Expected: one issue per finding in the same turn, linked from the PR. Fail: a
   list in the PR body, commit or report only. The `Stop` hook
-  `check-deferred-work.sh` blocks this turn once.
+  `check-deferred-work.sh` (optional project-todo plugin) blocks this turn once.
+- **B10, a reminder that is not a task.** In a repo with Jira, the agent notices
+  something to keep in mind for this project later (not work to do now, not a
+  ticket). Expected: a line in the project to-do file, not a Jira ticket. Fail:
+  a sentence only, or a ticket for a mere reminder.
 
 ## Improvement loop
 
@@ -100,4 +105,7 @@ non-records (PR description, commit, report), covers any language and says to
 create the issue in your own repo; a `Stop` hook enforces it once per turn.
 The record goes where the user already tracks later work (issue, ticket, to-do
 list); the session task list does not count, and with nothing found the agent
-asks where instead of inventing a backlog file.
+asks where instead of inventing a backlog file. The hook then moved to the
+optional project-todo plugin, which adds a per-project to-do file next to the
+Claude Code project memory: tasks go to the tracker, and to the file only with
+no tracker; reminders always go to the file.

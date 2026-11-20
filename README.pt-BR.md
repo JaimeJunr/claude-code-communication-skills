@@ -15,11 +15,6 @@ O principal deste projeto é um plugin, o `communication-stack`, com duas partes
   palavras simples e termina com o que você precisa fazer agora.
 - **Dois hooks de contexto**: a hora atual em cada prompt, e o repo, a branch e
   a carga da máquina no início da sessão.
-- **Checagem de trabalho adiado**: o turno que deixa algo para depois ("later",
-  "próximo PR", "fica para depois") sem registro onde você anota trabalho
-  futuro (issue no GitHub, ticket no Jira, sua lista de to-do) volta uma vez
-  para registrar.
-
 Só isso já basta. Todos os outros plugins daqui são **opcionais**: cada um muda
 ou melhora a comunicação ou a escrita do Claude Code numa tarefa específica
 (uma passada de brevidade, uma explicação em linguagem simples, a edição de um
@@ -32,8 +27,9 @@ apagar ressalvas; um editor pode substituir a voz pessoal. Empilhar todos també
 acrescenta instruções concorrentes e custo de contexto. A stack escolhe uma
 receita por tarefa, separa conversa, prosa publicável e texto de máquina, e não
 inclui hook que reinjete estilo. Os únicos hooks são dois hooks pequenos de
-contexto (a hora atual e o ambiente de trabalho) e uma checagem de que trabalho
-adiado ganhou registro.
+contexto (a hora atual e o ambiente de trabalho) e, no plugin opcional
+project-todo, o to-do do projeto e uma checagem de que trabalho adiado ganhou
+registro.
 
 A pesquisa está em [DESIGN.md](docs/research/DESIGN.md) e
 [ANALYSIS.md](docs/research/ANALYSIS.md). O layout segue o marketplace frontend
@@ -73,12 +69,18 @@ repo, branch, número de arquivos não commitados e carga da máquina (CPU, RAM,
 swap, pressão de memória, temperatura) no início da sessão e no máximo a cada 5
 minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O
 modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
-Um hook `Stop`, `check-deferred-work.sh`, lê o turno atual: se ele adia
+O plugin opcional **project-todo** guarda um to-do por projeto em
+`~/.claude/projects/<projeto>/memory/todo.md`, como uma memória de projeto do
+Claude Code (o único lugar de `~/.claude` onde ele grava sem pedir permissão): fora do repo, o mesmo para as worktrees, e mostrado (caminho e itens
+abertos, no máximo 10) no início da sessão. Tarefa deixada para depois vai para
+o tracker do projeto (issue no GitHub, ticket no Jira) e só vai para o arquivo
+quando não há tracker; lembrete que não é tarefa vai sempre para o arquivo. O
+hook `Stop` dele, `check-deferred-work.sh`, lê o turno atual: se ele adia
 trabalho em qualquer idioma ("later", "fora do escopo", "fica para depois") e
-não criou nem citou issue, ticket ou item de to-do, barra o fim do turno
-uma vez e pede o registro. Lista na descrição do PR ou na lista de tarefas da
-própria sessão não conta. Precisa de
-`python3` e fica calado sem ele.
+não criou nem citou issue, ticket ou item de to-do, barra o fim do turno uma
+vez e pede o registro. Lista na descrição do PR ou na lista de tarefas da
+própria sessão não conta. Os dois hooks precisam de `python3` e ficam calados
+sem ele.
 O plugin opcional **stt-repair** corrige erros de fala para texto (ditado) a
 partir de um glossário e pergunta quando um nome fica ambíguo. O plugin opcional
 **communication-router** guarda o roteador, a precedência e os
@@ -91,6 +93,7 @@ receita `eli5-ste:eli5` de Rahul.
 | `communication-stack` |  | 0 |
 | `communication-router` | `communication-stack` | 1 |
 | `stt-repair` | `stt-repair` | 1 |
+| `project-todo` |  | 0 |
 | `caveman` | `caveman` | 1 |
 | `i-have-adhd` | `i-have-adhd` | 1 |
 | `humanizer` | `humanizer` | 1 |
@@ -109,12 +112,13 @@ Depois da publicação deste repositório, execute no Claude Code:
 ```
 
 Esta é a única instalação obrigatória: ela fornece o estilo Stack Focus, os
-dois hooks de contexto e a checagem de trabalho adiado. Todos os plugins abaixo são opcionais; cada um muda ou
+dois hooks de contexto. Todos os plugins abaixo são opcionais; cada um muda ou
 melhora a comunicação ou a escrita do Claude Code. Instale só os que quiser:
 
 ```text
 /plugin install communication-router@communication-stack
 /plugin install stt-repair@communication-stack
+/plugin install project-todo@communication-stack
 /plugin install caveman@communication-stack
 /plugin install i-have-adhd@communication-stack
 /plugin install humanizer@communication-stack
@@ -292,8 +296,8 @@ e o [registro dos 44 conflitos](docs/research/DESIGN.md#complete-register-of-all
   reinjeção de estilo, flag always-on, reescrita automática, oferta de
   statusline ou alteração de AGENTS.md. O estilo de saída já está selecionado,
   então reinjetá-lo só duplica. Os dois hooks de contexto acima trazem fatos que
-  o modelo não vê, não estilo; a checagem de trabalho adiado só faz valer uma
-  regra do Stack Focus.
+  o modelo não vê, não estilo; os hooks opcionais do project-todo só mostram o
+  to-do e fazem valer uma regra do Stack Focus.
 
 ## Sincronização
 

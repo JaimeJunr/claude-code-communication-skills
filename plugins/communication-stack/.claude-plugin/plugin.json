@@ -1,6 +1,6 @@
 {
   "name": "communication-stack",
-  "description": "One output style, Stack Focus, two context hooks (current time, repo and machine) and a deferred-work check. Every other plugin is optional.",
+  "description": "One output style, Stack Focus, and two context hooks (current time, repo and machine). Every other plugin is optional.",
   "author": {
     "name": "Jaime Basso",
     "url": "https://github.com/JaimeJunr"

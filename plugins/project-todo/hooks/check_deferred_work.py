@@ -5,7 +5,8 @@ A regra "Deferred work" do Stack Focus sozinha não bastou: só 6% dos adiamento
 "Fica para depois" da descrição do PR. O hook lê o turno atual no transcript e, se o texto
 adia algo sem registro onde o usuário anota trabalho futuro (issue, ticket, item na lista de
 to-do) no mesmo turno, devolve "block" uma única vez. A lista de tarefas da própria sessão não
-conta: some com a sessão.
+conta: some com a sessão. Tarefa vai para o tracker; lembrete, ou tarefa sem tracker, para o
+to-do do projeto (project_todo.py).
 Qualquer falha de leitura sai sem bloquear: o hook nunca pode travar a sessão.
 """
 import json
@@ -13,6 +14,10 @@ import re
 import sys
 from pathlib import Path
 from typing import Any, Iterable
+
+# python3 -I tira a pasta do script do sys.path; o módulo irmão entra explicitamente.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from project_todo import todo_path  # noqa: E402
 
 DEFERRAL = re.compile(
     r"\b(?:"
@@ -42,9 +47,10 @@ REASON = (
     "Deferred work without a record: this turn sets work aside ({phrase!r}) but recorded it "
     "nowhere the user tracks later work. A list in a PR description, a commit, a code comment, "
     "this report or the session task list is not a record: it is gone once the PR or session "
-    "closes. Record each item now where the user already tracks work (GitHub issue, Jira ticket, "
-    "their to-do list; in your own repo, create the issue) and cite the links in the report. If "
-    "that place is shared or unclear, show the ready-to-create title and body and ask where, in "
+    "closes. Record each item now: a task goes to the project's tracker (GitHub issue, Jira "
+    "ticket; in your own repo, create the issue); with no tracker, or for a reminder that is not "
+    "a task, add a line to the project to-do {todo}. Cite the links or the file in the report. If "
+    "the tracker is shared or unclear, show the ready-to-create title and body and ask where, in "
     "the closing line. If nothing was actually set aside, finish as is."
 )
 
@@ -144,7 +150,14 @@ def decide(payload: dict[str, Any]) -> dict[str, str] | None:
     found = DEFERRAL.search(CODE.sub(" ", text))
     if not found or turn_records(turn, failed, text):
         return None
-    return {"decision": "block", "reason": REASON.format(phrase=found.group(0))}
+    return {"decision": "block", "reason": REASON.format(phrase=found.group(0), todo=todo_of(payload))}
+
+
+def todo_of(payload: dict[str, Any]) -> str:
+    try:
+        return str(todo_path(Path(payload["cwd"])))
+    except (KeyError, OSError, TypeError):
+        return "file (~/.claude/projects/<project>/memory/todo.md)"
 
 
 def main() -> None:
