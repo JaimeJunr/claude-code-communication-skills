@@ -67,9 +67,12 @@ pressure, temperature) at session start and at most every 5 minutes per
 session. The machine part reads `/proc`, so it appears on Linux only. The model
 cannot see the clock or the machine on its own; these hooks never touch the
 style. The owned, optional **project-todo** plugin keeps a to-do file per
-project in `~/.claude/projects/<project>/memory/todo.md`, as a Claude Code project
-memory (the one place under `~/.claude` it writes without a permission prompt): outside the repo, shared by its worktrees, and shown (path and open
-items, at most 10) at session start. A task set aside goes to the project's
+repo in `~/.local/share/claude-project-todo/<project>/todo.md` (or under
+`$XDG_DATA_HOME`): personal, never inside a versioned folder (a project's
+`memory/` is shared with the team in some setups), the same file for all the
+repo's worktrees, and shown (path and open items, at most 10) at session start.
+A `PreToolUse` hook lets Claude Code read and write that one file without a
+permission prompt. A task set aside goes to the project's
 tracker (GitHub issue, Jira ticket) and to this file only when there is none; a
 reminder that is not a task always goes to the file. Its `Stop` hook,
 `check-deferred-work.sh`, reads the current turn: if it sets work aside in any

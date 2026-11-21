@@ -70,9 +70,11 @@ swap, pressão de memória, temperatura) no início da sessão e no máximo a ca
 minutos por sessão. A parte da máquina lê `/proc`, então só aparece no Linux. O
 modelo não vê o relógio nem a máquina sozinho; esses hooks não mexem no estilo.
 O plugin opcional **project-todo** guarda um to-do por projeto em
-`~/.claude/projects/<projeto>/memory/todo.md`, como uma memória de projeto do
-Claude Code (o único lugar de `~/.claude` onde ele grava sem pedir permissão): fora do repo, o mesmo para as worktrees, e mostrado (caminho e itens
-abertos, no máximo 10) no início da sessão. Tarefa deixada para depois vai para
+`~/.local/share/claude-project-todo/<projeto>/todo.md` (ou em `$XDG_DATA_HOME`):
+pessoal, nunca dentro de pasta versionada (em alguns times a `memory/` do projeto
+é compartilhada), o mesmo para todas as worktrees do repo, e mostrado (caminho e
+itens abertos, no máximo 10) no início da sessão. Um hook `PreToolUse` deixa o
+Claude Code ler e gravar só esse arquivo sem pedir permissão. Tarefa deixada para depois vai para
 o tracker do projeto (issue no GitHub, ticket no Jira) e só vai para o arquivo
 quando não há tracker; lembrete que não é tarefa vai sempre para o arquivo. O
 hook `Stop` dele, `check-deferred-work.sh`, lê o turno atual: se ele adia

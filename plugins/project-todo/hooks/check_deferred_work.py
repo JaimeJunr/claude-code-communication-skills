@@ -17,7 +17,10 @@ from typing import Any, Iterable
 
 # python3 -I tira a pasta do script do sys.path; o módulo irmão entra explicitamente.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from project_todo import todo_path  # noqa: E402
+try:
+    from project_todo import todo_path
+except Exception:  # módulo irmão quebrado não pode derrubar a checagem nem a sessão
+    todo_path = None
 
 DEFERRAL = re.compile(
     r"\b(?:"
@@ -156,8 +159,8 @@ def decide(payload: dict[str, Any]) -> dict[str, str] | None:
 def todo_of(payload: dict[str, Any]) -> str:
     try:
         return str(todo_path(Path(payload["cwd"])))
-    except (KeyError, OSError, TypeError):
-        return "file (~/.claude/projects/<project>/memory/todo.md)"
+    except (KeyError, OSError, TypeError):  # TypeError cobre também todo_path ausente (None)
+        return "file (~/.local/share/claude-project-todo/<project>/todo.md)"
 
 
 def main() -> None:

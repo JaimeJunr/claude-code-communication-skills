@@ -1,6 +1,7 @@
 """Contract for the optional project-todo plugin: the project's to-do file and the deferred-work check."""
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -20,13 +21,14 @@ def encoded(path):
 class ProjectTodoPluginTest(unittest.TestCase):
     def test_plugin_ships_the_todo_and_deferred_work_hooks(self):
         self.assertEqual(sorted(path.name for path in HOOKS.iterdir() if path.name != "__pycache__"),
-                         ["check-deferred-work.sh", "check_deferred_work.py", "hooks.json",
+                         ["allow-todo.sh", "check-deferred-work.sh", "check_deferred_work.py", "hooks.json",
                           "inject-todo.sh", "project_todo.py"])
         config = json.loads((HOOKS / "hooks.json").read_text())["hooks"]
         commands = {event: [hook["command"] for entry in entries for hook in entry["hooks"]]
                     for event, entries in config.items()}
         self.assertEqual(commands, {
             "SessionStart": ['bash "${CLAUDE_PLUGIN_ROOT}/hooks/inject-todo.sh"'],
+            "PreToolUse": ['bash "${CLAUDE_PLUGIN_ROOT}/hooks/allow-todo.sh"'],
             "Stop": ['bash "${CLAUDE_PLUGIN_ROOT}/hooks/check-deferred-work.sh"']})
         manifest = json.loads((PLUGIN_DIR / ".claude-plugin" / "plugin.json").read_text())
         self.assertEqual(manifest["name"], "project-todo")
@@ -38,8 +40,8 @@ class ProjectTodoPluginTest(unittest.TestCase):
         self.assertNotIn("Stop", json.loads((core / "hooks" / "hooks.json").read_text())["hooks"])
 
 
-class TodoInjectionTest(unittest.TestCase):
-    """No início da sessão o agente vê onde fica o to-do do projeto e os itens abertos."""
+class TodoRepoCase(unittest.TestCase):
+    """Repo git temporário e o caminho do to-do dele."""
 
     def setUp(self):
         self.tmp = Path(self.enterContext(tempfile.TemporaryDirectory())).resolve()
@@ -52,7 +54,12 @@ class TodoInjectionTest(unittest.TestCase):
                         "--allow-empty", "-m", "init"], **git)
 
     def todo_file(self):
-        return self.home / ".claude" / "projects" / encoded(self.repo) / "memory" / "todo.md"
+        # Fora de ~/.claude/projects/<repo>/memory/: em alguns projetos essa pasta é versionada com o time.
+        return self.home / ".local" / "share" / "claude-project-todo" / encoded(self.repo) / "todo.md"
+
+
+class TodoInjectionTest(TodoRepoCase):
+    """No início da sessão o agente vê onde fica o to-do do projeto e os itens abertos."""
 
     def run_hook(self, cwd, raw=None):
         payload = raw if raw is not None else json.dumps({"hook_event_name": "SessionStart", "cwd": str(cwd)})
@@ -65,17 +72,17 @@ class TodoInjectionTest(unittest.TestCase):
         context = self.run_hook(self.repo)
         self.assertIn(str(self.todo_file()), context)
         self.assertIn("no file yet", context)
-        # Na pasta memory/ o Claude Code grava sem pedir permissão (o resto de ~/.claude é "sensível");
-        # o frontmatter e o link no MEMORY.md fazem o arquivo passar no formato de memória.
+        # Visto ao vivo: o agente tentou `ls` pelo Bash, que pede permissão; Read/Write/Edit o hook libera.
         for rule in ("a reminder that is not a task", "tracker", "only when there is none", "- [ ]", "- [x]",
-                     "name: project-todo", "type: project", "MEMORY.md"):
+                     "Read, Write and Edit", "not Bash"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, context)
+        self.assertNotIn("MEMORY.md", context)
 
     def test_lists_only_open_items_capped_at_ten(self):
         self.todo_file().parent.mkdir(parents=True)
         lines = [f"- [ ] 2026-11-20 item {n}" for n in range(12)] + ["- [x] 2026-11-19 old done 2026-11-20"]
-        self.todo_file().write_text("---\nname: project-todo\n---\n" + "\n".join(lines) + "\n")
+        self.todo_file().write_text("# To-do\n" + "\n".join(lines) + "\n")
         context = self.run_hook(self.repo)
         self.assertIn("12 open", context)
         self.assertIn("item 9", context)
@@ -95,7 +102,7 @@ class TodoInjectionTest(unittest.TestCase):
     def test_outside_git_uses_the_folder_itself(self):
         plain = self.tmp / "plain"
         plain.mkdir()
-        expected = self.home / ".claude" / "projects" / encoded(plain) / "memory" / "todo.md"
+        expected = self.home / ".local" / "share" / "claude-project-todo" / encoded(plain) / "todo.md"
         self.assertIn(str(expected), self.run_hook(plain))
 
     def test_bad_input_never_breaks_the_session(self):
@@ -105,6 +112,55 @@ class TodoInjectionTest(unittest.TestCase):
                                         env={"PATH": os.environ["PATH"], "HOME": str(self.home)})
                 self.assertEqual((result.returncode, result.stdout), (0, ""))
 
+
+    def test_xdg_data_home_is_honored(self):
+        data = self.tmp / "xdg"
+        env = {"PATH": os.environ["PATH"], "HOME": str(self.home), "XDG_DATA_HOME": str(data)}
+        payload = json.dumps({"hook_event_name": "SessionStart", "cwd": str(self.repo)})
+        result = subprocess.run(["bash", str(TODO_HOOK)], input=payload, capture_output=True, text=True,
+                                env=env, check=True)
+        self.assertIn(str(data / "claude-project-todo" / encoded(self.repo) / "todo.md"), result.stdout)
+
+
+ALLOW_HOOK = HOOKS / "allow-todo.sh"
+
+
+class AllowTodoHookTest(TodoRepoCase):
+    """Fora da pasta de trabalho o Claude Code pede permissão; o hook libera só o to-do deste projeto."""
+
+    def allow(self, tool, file_path, cwd=None):
+        payload = {"hook_event_name": "PreToolUse", "tool_name": tool, "cwd": str(cwd or self.repo),
+                   "tool_input": {"file_path": str(file_path)}}
+        result = subprocess.run(["bash", str(ALLOW_HOOK)], input=json.dumps(payload), capture_output=True,
+                                text=True, env={"PATH": os.environ["PATH"], "HOME": str(self.home)}, check=True)
+        if not result.stdout.strip():
+            return None
+        return json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"]
+
+    def test_allows_reading_and_writing_this_projects_todo(self):
+        for tool in ("Read", "Write", "Edit", "MultiEdit"):
+            with self.subTest(tool=tool):
+                self.assertEqual(self.allow(tool, self.todo_file()), "allow")
+
+    def test_allows_it_from_a_worktree_of_the_same_repo(self):
+        subprocess.run(["git", "worktree", "add", "-q", str(self.tmp / "wt"), "-b", "wt"],
+                       cwd=self.repo, check=True, capture_output=True)
+        self.assertEqual(self.allow("Edit", self.todo_file(), cwd=self.tmp / "wt"), "allow")
+
+    def test_stays_silent_for_any_other_file(self):
+        other_project = self.home / ".local" / "share" / "claude-project-todo" / "-other" / "todo.md"
+        for tool, path in (("Edit", other_project), ("Edit", self.todo_file().parent / "notes.md"),
+                           ("Write", self.repo / "todo.md"), ("Bash", self.todo_file()),
+                           ("Edit", str(self.todo_file().parent) + "/../-other/todo.md")):
+            with self.subTest(tool=tool, path=str(path)):
+                self.assertIsNone(self.allow(tool, path))
+
+    def test_bad_input_never_breaks_the_session(self):
+        for raw in ("not json", "{}", json.dumps({"tool_name": "Edit", "cwd": str(self.repo)})):
+            with self.subTest(raw=raw):
+                result = subprocess.run(["bash", str(ALLOW_HOOK)], input=raw, capture_output=True, text=True,
+                                        env={"PATH": os.environ["PATH"], "HOME": str(self.home)})
+                self.assertEqual((result.returncode, result.stdout), (0, ""))
 
 DEFERRED_HOOK = HOOKS / "check-deferred-work.sh"
 
@@ -262,6 +318,18 @@ class DeferredWorkHookTest(unittest.TestCase):
                                          tool_result("ok")],
                                         last_assistant_message="Tests are out of scope and stay for a next PR."))
 
+    def test_a_broken_todo_module_does_not_break_the_check(self):
+        # Visto ao mexer no project_todo.py: erro de sintaxe nele derrubava o hook com traceback.
+        hooks = self.tmp / "hooks"
+        shutil.copytree(HOOKS, hooks)
+        (hooks / "project_todo.py").write_text("this is not python")
+        payload = {"hook_event_name": "Stop", "transcript_path": str(self.tmp / "missing.jsonl"),
+                   "last_assistant_message": SUSSURRO_REPORT, "cwd": str(self.tmp)}
+        result = subprocess.run(["bash", str(hooks / "check-deferred-work.sh")], input=json.dumps(payload),
+                                capture_output=True, text=True)
+        self.assertEqual((result.returncode, result.stderr), (0, ""))
+        self.assertBlocks(json.loads(result.stdout))
+
     def test_bad_input_never_breaks_the_session(self):
         result = subprocess.run(["bash", str(DEFERRED_HOOK)], input="not json",
                                 capture_output=True, text=True)
@@ -272,13 +340,13 @@ class DeferredWorkHookTest(unittest.TestCase):
         repo.mkdir()
         decision = self.run_hook([user_prompt("go"), assistant_text(SUSSURRO_REPORT)], cwd=str(repo))
         self.assertBlocks(decision)
-        self.assertIn(f"/.claude/projects/{encoded(repo)}/memory/todo.md", decision["reason"])
+        self.assertIn(f"/.local/share/claude-project-todo/{encoded(repo)}/todo.md", decision["reason"])
         for rule in ("tracker", "a reminder that is not a task"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, decision["reason"])
 
     def test_writing_the_project_todo_is_a_record(self):
-        todo = f"/home/u/.claude/projects/{encoded(self.tmp)}/memory/todo.md"
+        todo = f"/home/u/.local/share/claude-project-todo/{encoded(self.tmp)}/todo.md"
         self.assertIsNone(self.run_hook([user_prompt("go"), assistant_tool("Edit", {"file_path": todo}),
                                          tool_result("ok"), assistant_text(SUSSURRO_REPORT)]))
 
