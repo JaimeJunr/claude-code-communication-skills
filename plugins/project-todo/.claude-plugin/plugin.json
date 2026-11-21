@@ -1,0 +1,17 @@
+{
+  "name": "project-todo",
+  "description": "Optional project to-do and deferred-work check: a per-project to-do file shown at session start, and a Stop check that blocks setting work aside without a record.",
+  "author": {
+    "name": "Jaime Basso",
+    "url": "https://github.com/JaimeJunr"
+  },
+  "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "repository": "https://github.com/JaimeJunr/claude-code-communication-skills",
+  "license": "MIT",
+  "keywords": [
+    "todo",
+    "deferred-work",
+    "hooks",
+    "claude-code"
+  ]
+}

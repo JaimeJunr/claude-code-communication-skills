@@ -6,7 +6,7 @@
     "url": "https://github.com/JaimeJunr"
   },
   "metadata": {
-    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and two context hooks (time and environment); no style re-injection."
+    "description": "Objective, short, clear communication for Claude Code: one output style, optional skill plugins, explicit conflict rulings, and two context hooks (time and environment), and an optional project to-do with a deferred-work check; no style re-injection."
   },
   "plugins": [
     {
@@ -25,7 +25,8 @@
         "writing",
         "clarity",
         "output-styles",
-        "claude-code"
+        "claude-code",
+        "skills"
       ]
     },
     {
@@ -43,6 +44,7 @@
         "communication",
         "writing",
         "clarity",
+        "output-styles",
         "claude-code",
         "skills"
       ]
@@ -60,8 +62,29 @@
       "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
       "keywords": [
         "communication",
-        "speech-to-text",
-        "dictation",
+        "writing",
+        "clarity",
+        "output-styles",
+        "claude-code",
+        "skills"
+      ]
+    },
+    {
+      "name": "project-todo",
+      "source": "./plugins/project-todo",
+      "description": "Optional project to-do and deferred-work check: a per-project to-do file shown at session start, and a Stop check that blocks setting work aside without a record.",
+      "author": {
+        "name": "Jaime Basso",
+        "url": "https://github.com/JaimeJunr"
+      },
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://github.com/JaimeJunr/claude-code-communication-skills",
+      "keywords": [
+        "communication",
+        "writing",
+        "clarity",
+        "output-styles",
         "claude-code",
         "skills"
       ]

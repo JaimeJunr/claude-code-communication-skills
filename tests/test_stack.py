@@ -19,7 +19,7 @@ token_budget = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(token_budget)
 
 STYLE_FILES = {"focus.md"}
-PLUGIN_NAMES = {"communication-stack", "communication-router", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste", "stt-repair"}
+PLUGIN_NAMES = {"communication-stack", "communication-router", "caveman", "i-have-adhd", "humanizer", "no-ai-slop", "eli5-ste", "stt-repair", "project-todo"}
 
 
 def styles():
@@ -58,13 +58,13 @@ class StackContractTest(unittest.TestCase):
     def test_no_plugin_ships_hooks(self):
         plugins = sorted(path for path in (ROOT / "plugins").glob("*") if path.is_dir())
         self.assertEqual({path.name for path in plugins}, PLUGIN_NAMES,
-                         f"scanned {len(plugins)} plugin directories; expected 8")
+                         f"scanned {len(plugins)} plugin directories; expected 9")
         # Hooks de estilo dos upstreams (caveman, ADHD...) reinjetariam o output style; só o
-        # communication-stack pode ter hook, e só o de data/hora (testado abaixo).
+        # communication-stack pode ter hook, e só os de contexto e o de trabalho adiado (testados abaixo).
         for plugin in plugins:
             with self.subTest(plugin=plugin.name):
                 hooks = [path for path in plugin.rglob("*") if path.is_dir() and path.name == "hooks"]
-                expected = [plugin / "hooks"] if plugin.name == "communication-stack" else []
+                expected = [plugin / "hooks"] if plugin.name in {"communication-stack", "project-todo"} else []
                 self.assertEqual(hooks, expected)
                 manifest = plugin / ".claude-plugin" / "plugin.json"
                 self.assertTrue(manifest.is_file(), f"{manifest}: missing manifest")
@@ -291,7 +291,10 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
         text = " ".join(self.FOCUS.read_text().split())
         for rule in ("Deferred work:", "same turn", "tracker the project uses",
                      "ready-to-create title and body",
-                     "pending creation in the closing line"):
+                     "pending creation in the closing line",
+                     "in any language", "is not a record", "PR description",
+                     "your own repo", "to-do list", "already uses",
+                     "session task list", "ask where"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
 
@@ -406,7 +409,6 @@ class DatetimeGapTest(unittest.TestCase):
     def test_sessions_do_not_share_the_gap(self):
         self.previous_message(5 * 3600, session="other")
         self.assertNotIn("since the previous message", self.run_hook(session="s1"))
-
 
 
 if __name__ == "__main__":

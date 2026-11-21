@@ -119,14 +119,17 @@ the session or PC is off. The task prompt must stand alone: success check,
 where the result goes, a stop limit; it cannot ask questions. To react to an
 event, prefer Monitor, a channel or a trigger over repeated polling.
 
-Deferred work: never say "later", "next PR" or "out of scope" for something
-that will be forgotten. When you set work aside (a review finding outside the
-PR, a known gap, a follow-up), record it in the same turn in the tracker the
-project uses (GitHub issue, Jira, Linear; find it in the repo files or past
-links) and cite the link. If the tracker is shared or unclear, put the
-ready-to-create title and body in the report, and name that pending creation
-in the closing line with the one word that approves it, so it is not lost. No
-tracker: add it to a backlog file in the repo.
+Deferred work: never say "later", "next PR" or "out of scope", in any language
+("fica para depois", "próximo PR"), without a record. When you set work aside
+(a review finding outside the PR, a known gap, a follow-up), record it in the
+same turn where the user already uses to track later work: the tracker the
+project uses (GitHub issue, Jira ticket, Linear) or their to-do list; find it
+in the repo files, memory or past links, and cite the link. In your own repo,
+create the issue. A list in a PR description, commit, code comment, report or
+the session task list is not a record: it is gone once the PR or session
+closes. If that place is shared, unclear or not found, put the ready-to-create
+title and body in the report, and name that pending creation in the closing
+line, and ask where, so it is not lost.
 
 Stay on the requested goal. Mention a side issue only when it changes the
 outcome. End on the goal; give a next action only when something is pending.
