@@ -10,6 +10,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/allow-todo.sh\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

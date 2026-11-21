@@ -1,12 +1,13 @@
-"""To-do do projeto: um arquivo por projeto em ~/.claude/projects/<pasta>/memory/todo.md.
+"""To-do do projeto: um arquivo por repo em ~/.local/share/claude-project-todo/<pasta>/todo.md.
 
-Fica na pasta de memória do projeto porque é a única parte de ~/.claude onde o Claude Code grava
-sem pedir permissão (o resto é "arquivo sensível", e nem um hook PreToolUse "allow" libera: testado
-em 2026-11-20). Por isso o arquivo tem frontmatter de memória e um link no MEMORY.md. Fica fora do
-repositório (não suja o git status) e é o mesmo para todas as worktrees e subpastas do projeto.
+Fica fora de qualquer pasta versionada: a memory/ do projeto em ~/.claude/projects às vezes é
+versionada com o time (repos *-context), e o to-do é pessoal. É o mesmo arquivo para todas as
+worktrees e subpastas do repo. Fora da pasta de trabalho o Claude Code pede permissão para ler e
+gravar; o hook PreToolUse (modo "allow") libera só o to-do do projeto da sessão. Em ~/.claude isso
+não funciona: lá o arquivo é "sensível" e nem o "allow" passa (testado em 2026-11-20).
 Uso: o que só precisa ser lembrado no projeto vai sempre para cá; tarefa vai para o tracker
 (issue, Jira) e só vem para cá quando o projeto não tem tracker.
-No SessionStart, imprime onde fica o arquivo e os itens abertos. Qualquer falha sai calada.
+SessionStart: imprime onde fica o arquivo e os itens abertos. Qualquer falha sai calada.
 """
 import json
 import os
@@ -24,13 +25,8 @@ USAGE = (
     "a reminder that is not a task always goes here; a task goes to the project's tracker "
     "(GitHub issue, Jira ticket) and comes here only when there is none. One line per item: "
     "`- [ ] YYYY-MM-DD <what is left> (from <PR, session or file>)`. When an item is done, "
-    "change it to `- [x]` and append `done YYYY-MM-DD`; never delete it."
-)
-CREATE = (
-    "To create it, start the file with this frontmatter: `---`, `name: project-todo`, "
-    "`description: Work set aside for later in this project; open items are shown at session start`, "
-    "`metadata:`, `  type: project`, `---`; then add `- [Project to-do](todo.md) — work set aside for "
-    "later in this project` to MEMORY.md in the same folder."
+    "change it to `- [x]` and append `done YYYY-MM-DD`; never delete it. Use Read, Write and Edit "
+    "on this file (no permission prompt), not Bash."
 )
 
 
@@ -48,10 +44,10 @@ def project_root(cwd: Path) -> Path:
 
 
 def todo_path(cwd: Path) -> Path:
-    # Mesmo nome de pasta que o Claude Code usa para a memória do projeto.
+    # Mesmo nome de pasta que o Claude Code usa em ~/.claude/projects para o projeto.
     encoded = re.sub(r"[^A-Za-z0-9]", "-", str(project_root(cwd)))
-    config = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
-    return config / "projects" / encoded / "memory" / "todo.md"
+    data = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share")
+    return data / "claude-project-todo" / encoded / "todo.md"
 
 
 def session_context(cwd: Path) -> str:
@@ -59,22 +55,46 @@ def session_context(cwd: Path) -> str:
     try:
         items = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if OPEN_ITEM.match(line)]
     except FileNotFoundError:
-        return USAGE.format(path=path, status="no file yet; create it with the first item") + " " + CREATE
+        return USAGE.format(path=path, status="no file yet; create it with the first item")
     listed = items[:MAX_LISTED]
     more = [f"+{len(items) - MAX_LISTED} more in the file"] if len(items) > MAX_LISTED else []
     return "\n".join([USAGE.format(path=path, status=f"{len(items)} open")] + listed + more)
 
 
+FILE_TOOLS = ("Read", "Write", "Edit", "MultiEdit")
+
+
+def allows(payload: dict[str, Any]) -> bool:
+    """PreToolUse: libera ler e gravar só o to-do do projeto desta sessão, caminho normalizado."""
+    if payload.get("tool_name") not in FILE_TOOLS:
+        return False
+    target = (payload.get("tool_input") or {}).get("file_path")
+    if not target:
+        return False
+    expected = todo_path(Path(payload["cwd"]))
+    return os.path.normpath(os.path.expanduser(str(target))) == os.path.normpath(str(expected))
+
+
+def respond(mode: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+    if mode == "allow":
+        if not allows(payload):
+            return None
+        return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow",
+                                       "permissionDecisionReason": "project to-do (project-todo plugin)"}}
+    cwd = Path(payload["cwd"])
+    if not cwd.is_dir():
+        return None
+    return {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": session_context(cwd)}}
+
+
 def main() -> None:
     try:
         payload: dict[str, Any] = json.loads(sys.stdin.read())
-        cwd = Path(payload["cwd"])
-        if not cwd.is_dir():
-            return
-        context = session_context(cwd)
+        decision = respond(sys.argv[1] if len(sys.argv) > 1 else "session", payload)
     except Exception:  # o hook nunca pode quebrar a sessão
         return
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}))
+    if decision:
+        print(json.dumps(decision))
 
 
 if __name__ == "__main__":

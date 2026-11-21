@@ -106,6 +106,7 @@ create the issue in your own repo; a `Stop` hook enforces it once per turn.
 The record goes where the user already tracks later work (issue, ticket, to-do
 list); the session task list does not count, and with nothing found the agent
 asks where instead of inventing a backlog file. The hook then moved to the
-optional project-todo plugin, which adds a per-project to-do file next to the
-Claude Code project memory: tasks go to the tracker, and to the file only with
-no tracker; reminders always go to the file.
+optional project-todo plugin, which adds a personal per-repo to-do file in
+`~/.local/share/claude-project-todo/`, outside the project `memory/` folder
+because some teams version that folder: tasks go to the tracker, and to the
+file only with no tracker; reminders always go to the file.
