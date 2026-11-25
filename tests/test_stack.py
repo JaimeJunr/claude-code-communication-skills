@@ -282,8 +282,21 @@ class StateRoutingAndFocusRulesTest(unittest.TestCase):
 
     def test_focus_style_picks_the_scheduling_kind_by_need(self):
         text = " ".join(self.FOCUS.read_text().split())
-        for rule in ("Pick the kind by need", "what happens if the session or PC is off",
-                     "The task prompt must stand alone", "stop limit", "prefer Monitor"):
+        for rule in ("Pick by the task", "what happens if the session or PC is off",
+                     "the check must stand alone", "Time unclear", "PC off at that time: cloud task",
+                     "No desktop tools: session cron", "Monitor) needs no yes", "stop limit", "prefer Monitor"):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, text)
+
+    def test_focus_style_brings_the_scheduled_result_back_to_the_same_chat(self):
+        text = " ".join(self.FOCUS.read_text().split())
+        for rule in ("must come back to this chat", "without being asked",
+                     "even a read-only check", "An archived chat gets nothing",
+                     "This chat runs the check", "Cloud task by default",
+                     "never carries it from another chat", "no menu of tools",
+                     "one-shot session cron", "`send_message`",
+                     "completion notice does not reach this chat",
+                     "If nothing can return here, say so before scheduling"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, text)
 

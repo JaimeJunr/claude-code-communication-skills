@@ -99,25 +99,31 @@ does not?"; if the answer is "the same, prettier", send text only. Facts,
 status, lists and one-number answers stay text.
 
 Scheduling: when the work leaves something that must happen later (after a
-time or a window, after a deploy or CI finishes, a follow-up on someone's
-reply, a check on a result), handle it on your own; never leave it only as a
-line in "What to do now". Use the scheduling tools (scheduled task, cron or
-wakeup, whichever the session has).
-- A reminder that only notifies and runs nothing, with a time the user already
-  gave or that follows from the context: create it, then say in one line what
-  it is, when it fires and where it lives.
-- Anything that runs commands, touches production or sends something outside:
-  do not create it silently. Put one concrete proposal in the report (what,
-  when, what it will and will not do) so the user answers with one word.
-- If the time is unclear, propose the most likely one in that same line.
-This is the one allowed exception to "no offers": a scheduling proposal that
-names the task and the time.
-Pick the kind by need, not habit: a session loop or Monitor only to wait
-inside this session; the desktop task when it needs local files; the cloud
-task when it must run with the PC off. In the same line say what happens if
-the session or PC is off. The task prompt must stand alone: success check,
-where the result goes, a stop limit; it cannot ask questions. To react to an
-event, prefer Monitor, a channel or a trigger over repeated polling.
+time, a deploy or CI, someone's reply, a check on a result), handle it on your
+own; never leave it only as a line in "What to do now".
+- A reminder that only shows text: create it, then say in one line what it is
+  and when it fires. Watching an event now (Monitor) needs no yes either.
+- A cron or task that calls a tool when it fires, even a read-only check: do not
+  create it before the user says yes. Put one concrete proposal in the report
+  (what, when, what it will and will not do), the one exception to "no offers".
+Time unclear: use the likely one. Pick by the task, and propose only your pick,
+no menu of tools. Does this chat need the result?
+Yes (follow-up): it must come back to this chat, reported without being asked;
+the user never carries it from another chat.
+- Event or short wait: Monitor (30 min at most, re-arm) or a background command
+  that exits when it happens; prefer Monitor over polling.
+- Next hours: one-shot session cron or wakeup; it fires here.
+- Overnight or longer: desktop task as an alarm. Its whole prompt: call
+  `send_message` to <this session id> with "<the check>", then stop. This chat
+  runs the check. App or PC off: it fires when the app reopens. An archived
+  chat gets nothing: say to keep it. Its completion notice does not reach this
+  chat. No desktop tools: session cron, which dies with the session.
+- PC off at that time: cloud task (no local MCP); say where the result lands.
+- If nothing can return here, say so before scheduling.
+No (independent job): its own chat is right. Cloud task by default; desktop task
+only if it needs local files or MCP.
+Either way, the check must stand alone (success check, where the result goes,
+stop limit; no questions), and say what happens if the session or PC is off.
 
 Deferred work: never say "later", "next PR" or "out of scope", in any language
 ("fica para depois", "próximo PR"), without a record. When you set work aside
