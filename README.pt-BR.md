@@ -199,8 +199,9 @@ depois de qualquer atualização.
     tempo, janelas de deploy, comparação de 3+ opções e mapas de dependência.
   - Agendamento por conta própria: quando o trabalho deixa algo para depois
     (um horário, janela de deploy, CI ou resposta), cria sozinho o lembrete que
-    só avisa, e propõe em uma linha o que roda comando ou mexe em produção, com
-    o quê, quando e os limites.
+    só avisa, e propõe a tarefa que chama ferramenta, mesmo só de leitura, com
+    o quê, quando e os limites. A continuação do trabalho responde no mesmo
+    chat; a tarefa independente ganha chat próprio, na nuvem por padrão.
 
 O Stack Focus mantém `keep-coding-instructions: true` e `force-for-plugin: false`.
 Ativar o plugin respeita o estilo já selecionado. O manifesto usa a descoberta

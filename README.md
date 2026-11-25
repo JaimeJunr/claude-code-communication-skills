@@ -199,8 +199,9 @@ any update.
     for timelines, deploy windows, 3+ option comparisons and dependency maps.
   - Scheduling on its own: when work leaves something for later (after a time,
     a deploy window, CI or a reply), it creates a notify-only reminder itself,
-    and proposes anything that runs commands or touches production in one line
-    with what, when and its limits.
+    and proposes any task that calls a tool, even a read-only check, with what,
+    when and its limits. A follow-up reports in the same chat; an independent
+    job gets its own chat, in the cloud by default.
 
 Stack Focus keeps `keep-coding-instructions: true` and `force-for-plugin: false`.
 Enabling the plugin respects the existing selection. Styles use the default

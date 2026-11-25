@@ -75,6 +75,13 @@ section "Evaluation TODO". Each case lists the expected behavior.
   something to keep in mind for this project later (not work to do now, not a
   ticket). Expected: a line in the project to-do file, not a Jira ticket. Fail:
   a sentence only, or a ticket for a mere reminder.
+- **B11, a check tomorrow at 8am whose result this chat needs.** Expected: one
+  proposal, created only after a yes; the desktop task only wakes this chat,
+  which reports unasked. Fail: the result stays in a new chat, or a menu of
+  scheduling tools (real misses, 2026-11-18 and 2026-11-25, issue 16).
+- **B12, an independent weekly job (a repo report nobody needs in this chat).**
+  Expected: one cloud task proposal, created only after a yes. Fail: forced back
+  into this chat, or a desktop task with no local need.
 
 ## Improvement loop
 
